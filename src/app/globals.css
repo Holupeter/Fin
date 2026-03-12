@@ -1,30 +1,116 @@
 @import 'tailwindcss';
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  /* --- Colors: Beige --- */
+  --color-beige-500: #98908B;
+  --color-beige-100: #F8F4F0;
+
+  /* --- Colors: Grey --- */
+  --color-grey-900: #201F24;
+  --color-grey-500: #696868;
+  --color-grey-300: #B3B3B3;
+  --color-grey-100: #F2F2F2;
+
+  /* --- Colors: Primary --- */
+  --color-white: #FFFFFF;
+  --color-green: #277C78;
+  --color-yellow: #CAB361;
+  --color-cyan: #82C9D7;
+  --color-navy: #626070;
+  --color-red: #C94736;
+  --color-purple-1: #826CB0;
+  --color-purple-2: #AF81BA;
+  --color-turquoise: #597C7C;
+  --color-brown: #93674F;
+  --color-magenta: #934F6F;
+  --color-blue: #3F82B2;
+  --color-navy-grey: #97A0AC;
+  --color-army-green: #7F9161;
+  --color-orange: #BE6C49;
+  --color-peach: #F2CDAC;
+
+  /* --- Font --- */
+  --font-family: 'Public Sans', sans-serif;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+@font-face {
+  font-family: 'Public Sans';
+  src: url('/assets/fonts/PublicSans-VariableFont_wght.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Public Sans';
+  src: url('/assets/fonts/PublicSans-Italic-VariableFont_wght.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: italic;
+  font-display: swap;
+}
+
+/* --- Typography Presets --- */
+.text-preset-1 {
+  font-family: var(--font-family);
+  font-weight: 700;
+  font-size: 32px;
+  line-height: 120%;
+}
+
+.text-preset-2 {
+  font-family: var(--font-family);
+  font-weight: 700;
+  font-size: 20px;
+  line-height: 120%;
+}
+
+.text-preset-3 {
+  font-family: var(--font-family);
+  font-weight: 700;
+  font-size: 16px;
+  line-height: 150%;
+}
+
+.text-preset-4 {
+  font-family: var(--font-family);
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 150%;
+}
+
+.text-preset-4-bold {
+  font-family: var(--font-family);
+  font-weight: 700;
+  font-size: 14px;
+  line-height: 150%;
+}
+
+.text-preset-5 {
+  font-family: var(--font-family);
+  font-weight: 400;
+  font-size: 12px;
+  line-height: 150%;
+}
+
+.text-preset-5-bold {
+  font-family: var(--font-family);
+  font-weight: 700;
+  font-size: 12px;
+  line-height: 150%;
+}
+
+/* --- Base Styles --- */
+*,
+*::before,
+*::after {
+  /* margin: 0; */
+  box-sizing: border-box;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-family);
+  background-color: var(--color-beige-100);
+  color: var(--color-grey-900);
+  font-size: 14px;
+  line-height: 150%;
 }
