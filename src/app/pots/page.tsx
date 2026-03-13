@@ -5,43 +5,67 @@ import MobileSidebar from "@/components/MobileSidebar";
 import Image from "next/image";
 import { useState } from "react";
 import ProfileModal from "@/components/ProfileModal";
+import AddPotModal from "@/components/AddPotModal";
+import EditPotModal from "@/components/EditPotModal";
+import DeletePotModal from "@/components/DeletePotModal";
+import AdjustPotBalanceModal from "@/components/AdjustPotBalanceModal";
+import { SmartAmount } from "@/components/SmartAmount";
 import { useCurrency } from "@/providers/CurrencyProvider";
 
 export default function PotsPage() {
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+  const [isAddPotModalOpen, setIsAddPotModalOpen] = useState(false);
+  const [isEditPotModalOpen, setIsEditPotModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isAdjustModalOpen, setIsAdjustModalOpen] = useState(false);
+  const [adjustMode, setAdjustMode] = useState<"add" | "withdraw">("add");
+  const [selectedPotForAdjust, setSelectedPotForAdjust] = useState<any>(null);
+  const [potToDelete, setPotToDelete] = useState("");
+  const [editingPot, setEditingPot] = useState<{name: string, target: number, theme: string} | null>(null);
+  const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
   const { formatCurrency } = useCurrency();
+
+  const toggleDropdown = (id: string) => {
+    setOpenDropdownId(openDropdownId === id ? null : id);
+  };
+
   const pots = [
     {
       name: "Savings",
-      color: "bg-[#277C78]",
+      color: "bg-green",
+      theme: "Green",
       saved: 159.00,
       target: 2000,
       percentage: "7.95%",
     },
     {
       name: "Concert Ticket",
-      color: "bg-grey-500", // #626070
+      color: "bg-navy",
+      theme: "Navy",
       saved: 110.00,
       target: 150,
       percentage: "73.3%",
     },
     {
       name: "Christmas Gift",
-      color: "bg-cyan-500", // #82C9D7
+      color: "bg-cyan",
+      theme: "Cyan",
       saved: 40.00,
       target: 60,
       percentage: "66.6%",
     },
     {
       name: "Holiday to Japan",
-      color: "bg-[#826CB0]",
+      color: "bg-purple-1",
+      theme: "Purple",
       saved: 531.00,
       target: 1440,
       percentage: "36.8%",
     },
     {
       name: "New Laptop",
-      color: "bg-yellow-500", // #F2CDAC
+      color: "bg-yellow",
+      theme: "Yellow",
       saved: 10.00,
       target: 1000,
       percentage: "1.0%",
@@ -57,7 +81,10 @@ export default function PotsPage() {
           <div className="flex flex-row items-center justify-between w-full max-w-[480px] md:max-w-[688px] lg:max-w-[1060px]">
             <h1 className="text-preset-1 text-grey-900">Pots</h1>
             <div className="flex flex-row items-center gap-4">
-              <button className="flex flex-row justify-center items-center px-4 h-[53px] bg-grey-900 text-white text-preset-4-bold rounded-lg cursor-pointer hover:bg-grey-500 transition-colors">
+              <button 
+                onClick={() => setIsAddPotModalOpen(true)}
+                className="flex flex-row justify-center items-center px-4 h-[53px] bg-grey-900 text-white text-preset-4-bold rounded-lg cursor-pointer hover:bg-grey-500 transition-colors"
+              >
                 + Add New Pot
               </button>
               <button 
@@ -72,9 +99,10 @@ export default function PotsPage() {
         </div>
 
         {/* Pots List */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 px-4 pb-6 md:px-10 md:pb-8 lg:px-10 lg:pb-8 gap-6 w-full mx-auto">
-          {pots.map((pot, index) => (
-            <div key={index} className="flex flex-col items-start p-6 gap-8 w-full bg-white rounded-xl">
+        <div className="flex flex-col items-center w-full px-4 pb-6 md:px-10 md:pb-8 lg:px-10 lg:pb-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 w-full max-w-[480px] md:max-w-[688px] lg:max-w-[1060px]">
+            {pots.map((pot, index) => (
+              <div key={index} className="flex flex-col items-start p-6 gap-8 w-full bg-white rounded-xl">
               
               {/* Title Header */}
               <div className="flex flex-row justify-between items-center w-full">
@@ -83,25 +111,56 @@ export default function PotsPage() {
                   <h2 className="text-preset-2 text-grey-900">{pot.name}</h2>
                 </div>
                 {/* Ellipsis icon */}
-                <button className="bg-transparent border-none cursor-pointer p-0 opacity-60 hover:opacity-100 group">
-                  <Image 
-                    src="/assets/images/icon-ellipsis.svg" 
-                    alt="Options" 
-                    width={16} 
-                    height={16} 
-                    className="text-grey-300" 
-                    style={{filter: 'brightness(0) saturate(100%) invert(80%) sepia(2%) saturate(16%) hue-rotate(14deg) brightness(85%) contrast(92%)'}}
-                  />
-                </button>
+                <div className="relative">
+                  <button 
+                    onClick={() => toggleDropdown(pot.name)}
+                    className="bg-transparent border-none cursor-pointer p-0 opacity-60 hover:opacity-100 group"
+                  >
+                    <Image 
+                      src="/assets/images/icon-ellipsis.svg" 
+                      alt="Options" 
+                      width={16} 
+                      height={16} 
+                      className="text-grey-300" 
+                      style={{filter: 'brightness(0) saturate(100%) invert(80%) sepia(2%) saturate(16%) hue-rotate(14deg) brightness(85%) contrast(92%)'}}
+                    />
+                  </button>
+
+                  {/* Dropdown - Edit Delete Pot */}
+                  {openDropdownId === pot.name && (
+                    <div className="flex absolute top-8 right-0 flex-col items-start p-[12px_20px] gap-3 w-[114px] bg-white shadow-[0px_4px_24px_rgba(0,0,0,0.25)] rounded-lg z-20">
+                      <button 
+                         onClick={() => {
+                          setEditingPot({ name: pot.name, target: pot.target, theme: pot.theme });
+                          setIsEditPotModalOpen(true);
+                          setOpenDropdownId(null);
+                        }}
+                        className="flex flex-row items-center p-0 gap-4 w-full bg-transparent border-none cursor-pointer hover:opacity-70 transition-opacity text-left"
+                      >
+                        <span className="text-preset-4 text-grey-900">Edit Pot</span>
+                      </button>
+                      <div className="w-full h-[1px] bg-[#F2F2F2]"></div>
+                      <button 
+                        onClick={() => {
+                          setPotToDelete(pot.name);
+                          setIsDeleteModalOpen(true);
+                          setOpenDropdownId(null);
+                        }}
+                        className="flex flex-row items-center p-0 gap-4 w-full bg-transparent border-none cursor-pointer hover:opacity-70 transition-opacity text-left"
+                      >
+                        <span className="text-preset-4 text-red">Delete Pot</span>
+                      </button>
+                    </div>
+                  )}
+                </div>
               </div>
 
               {/* Pot Bar and Details */}
               <div className="flex flex-col justify-center items-start gap-4 w-full">
                 
-                {/* Total Saved Texts */}
-                <div className="flex flex-row justify-between items-center w-full">
+                <div className="flex flex-row flex-wrap justify-between items-center w-full gap-2 overflow-hidden">
                   <span className="text-preset-4 text-grey-500">Total Saved</span>
-                  <span className="text-preset-1 text-grey-900">{formatCurrency(pot.saved)}</span>
+                  <SmartAmount amount={formatCurrency(pot.saved)} className="text-preset-1 text-grey-900 text-right" maxWidth={300} />
                 </div>
 
                 {/* Tracking Bar */}
@@ -112,9 +171,12 @@ export default function PotsPage() {
                       style={{ width: pot.percentage }}
                     />
                   </div>
-                  <div className="flex flex-row justify-between w-full">
+                  <div className="flex flex-row justify-between w-full overflow-hidden">
                     <span className="text-preset-5-bold text-grey-500">{pot.percentage}</span>
-                    <span className="text-preset-5 text-grey-500">Target of {formatCurrency(pot.target)}</span>
+                    <div className="flex flex-row gap-1 items-center shrink-0">
+                      <span className="text-preset-5 text-grey-500">Target of</span>
+                      <SmartAmount amount={formatCurrency(pot.target)} className="text-preset-5 text-grey-500" maxWidth={60} />
+                    </div>
                   </div>
                 </div>
 
@@ -122,16 +184,31 @@ export default function PotsPage() {
 
               {/* Action Buttons */}
               <div className="flex flex-row items-start gap-4 w-full">
-                <button className="flex-1 flex flex-row justify-center items-center py-4 bg-beige-100 rounded-lg h-[53px] hover:bg-white hover:border hover:border-beige-500 transition-colors">
+                <button 
+                  onClick={() => {
+                    setSelectedPotForAdjust(pot);
+                    setAdjustMode("add");
+                    setIsAdjustModalOpen(true);
+                  }}
+                  className="flex-1 flex flex-row justify-center items-center py-4 bg-beige-100 rounded-lg h-[53px] hover:bg-white hover:border hover:border-beige-500 transition-colors"
+                >
                   <span className="text-preset-4-bold text-grey-900">+ Add Money</span>
                 </button>
-                <button className="flex-1 flex flex-row justify-center items-center py-4 bg-beige-100 rounded-lg h-[53px] hover:bg-white hover:border hover:border-beige-500 transition-colors">
+                <button 
+                  onClick={() => {
+                    setSelectedPotForAdjust(pot);
+                    setAdjustMode("withdraw");
+                    setIsAdjustModalOpen(true);
+                  }}
+                  className="flex-1 flex flex-row justify-center items-center py-4 bg-beige-100 rounded-lg h-[53px] hover:bg-white hover:border hover:border-beige-500 transition-colors"
+                >
                   <span className="text-preset-4-bold text-grey-900">Withdraw</span>
                 </button>
               </div>
 
             </div>
-          ))}
+            ))}
+          </div>
         </div>
       </main>
 
@@ -142,6 +219,26 @@ export default function PotsPage() {
       <ProfileModal 
         isOpen={isProfileModalOpen} 
         onClose={() => setIsProfileModalOpen(false)} 
+      />
+      <AddPotModal 
+        isOpen={isAddPotModalOpen} 
+        onClose={() => setIsAddPotModalOpen(false)} 
+      />
+      <EditPotModal 
+        isOpen={isEditPotModalOpen} 
+        onClose={() => setIsEditPotModalOpen(false)} 
+        pot={editingPot || undefined}
+      />
+      <DeletePotModal 
+        isOpen={isDeleteModalOpen} 
+        onClose={() => setIsDeleteModalOpen(false)} 
+        potName={potToDelete}
+      />
+      <AdjustPotBalanceModal
+        isOpen={isAdjustModalOpen}
+        onClose={() => setIsAdjustModalOpen(false)}
+        pot={selectedPotForAdjust}
+        mode={adjustMode}
       />
     </div>
   );

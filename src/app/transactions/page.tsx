@@ -5,6 +5,7 @@ import MobileSidebar from "@/components/MobileSidebar";
 import DesktopSidebar from "@/components/DesktopSidebar";
 import { useState } from "react";
 import ProfileModal from "@/components/ProfileModal";
+import { SmartAmount } from "@/components/SmartAmount";
 import { useCurrency } from "@/providers/CurrencyProvider";
 
 export default function TransactionsPage() {
@@ -37,7 +38,7 @@ export default function TransactionsPage() {
         <div className="sticky top-0 z-10 flex flex-row items-center justify-center w-full bg-beige-100 px-4 pt-6 pb-6 md:px-10 md:pt-8 md:pb-8 lg:px-10 lg:pt-8 lg:pb-8">
           <div className="w-full flex justify-between items-center max-w-[480px] md:max-w-[688px] lg:max-w-[1060px]">
             <h1 className="text-preset-1 text-grey-900">Transactions</h1>
-            <button 
+            <button
               onClick={() => setIsProfileModalOpen(true)}
               className="w-10 h-10 rounded-full bg-white overflow-hidden border border-grey-500 relative cursor-pointer opacity-90 hover:opacity-100 transition-opacity p-0 flex-shrink-0"
               aria-label="Open Profile"
@@ -48,124 +49,128 @@ export default function TransactionsPage() {
         </div>
 
         <div className="flex flex-col items-center px-4 pb-6 md:px-10 md:pb-8 lg:px-10 lg:pb-8 gap-8 w-full">
-        <div className="flex flex-col items-center px-5 py-6 gap-6 w-full max-w-[343px] md:max-w-[688px] lg:max-w-[1060px] bg-white rounded-xl">
-          <div className="flex flex-row justify-between items-center w-full gap-6">
-            <div className="flex flex-row items-center px-5 py-3 gap-4 w-[215px] h-[45px] bg-white border border-grey-500 rounded-lg group focus-within:border-grey-900">
-              <input
-                type="text"
-                placeholder="Search transaction"
-                className="w-full text-preset-4 text-grey-900 placeholder:text-grey-500 outline-none bg-transparent"
-              />
-              <Image src="/assets/images/icon-search.svg" alt="Search" width={16} height={16} className="opacity-60 group-focus-within:opacity-100" />
-            </div>
-
-            <div className="flex flex-row justify-end items-center gap-6 shrink-0 md:h-[45px]">
-              
-              {/* Sort By Container */}
-              <div className="flex flex-row items-center gap-2 relative">
-                <span className="hidden md:block text-preset-4 text-grey-500">Sort by</span>
-                <button 
-                  onClick={() => setIsSortOpen(!isSortOpen)}
-                  className="flex items-center justify-center md:justify-between w-5 h-5 md:w-[114px] md:h-[45px] md:px-5 md:py-3 md:border md:border-grey-500 md:rounded-lg bg-transparent md:bg-white cursor-pointer hover:border-grey-900 group transition-colors" 
-                  aria-label="Sort"
-                >
-                  <Image src="/assets/images/icon-sort-mobile.svg" alt="Sort" width={20} height={20} className="md:hidden" />
-                  <span className="hidden md:block text-preset-4 text-grey-900">{activeSort}</span>
-                  <Image src="/assets/images/icon-caret-down.svg" alt="Caret" width={12} height={12} className={`hidden md:block transition-transform duration-300 ${isSortOpen ? "rotate-180" : ""}`} />
-                </button>
-
-                {/* Dropdown Menu */}
-                {isSortOpen && (
-                  <div className="absolute top-[30px] md:top-[55px] right-0 flex flex-col items-start p-3 md:py-3 md:px-5 gap-3 w-[114px] bg-white shadow-[0px_4px_24px_rgba(0,0,0,0.25)] rounded-lg z-50">
-                    {sortOptions.map((opt, i) => (
-                      <div key={opt} className="flex flex-col w-full gap-3">
-                        <button
-                          onClick={() => { setActiveSort(opt); setIsSortOpen(false); }}
-                          className="flex flex-row items-center w-full bg-transparent border-none p-0 cursor-pointer text-left hover:opacity-80 transition-opacity"
-                        >
-                          <span className={`w-full ${activeSort === opt ? "text-preset-4-bold text-grey-900" : "text-preset-4 text-grey-900"}`}>{opt}</span>
-                        </button>
-                        {i < sortOptions.length - 1 && <div className="w-full h-[1px] border-b border-[#F2F2F2]"></div>}
-                      </div>
-                    ))}
-                  </div>
-                )}
+          <div className="flex flex-col items-center px-5 py-6 gap-6 w-full max-w-[343px] md:max-w-[688px] lg:max-w-[1060px] bg-white rounded-xl">
+            <div className="flex flex-row justify-between items-center w-full gap-6">
+              <div className="flex flex-row items-center px-5 py-3 gap-4 w-[215px] h-[45px] bg-white border border-grey-500 rounded-lg group focus-within:border-grey-900">
+                <input
+                  type="text"
+                  placeholder="Search transaction"
+                  className="w-full text-preset-4 text-grey-900 placeholder:text-grey-500 outline-none bg-transparent"
+                />
+                <Image src="/assets/images/icon-search.svg" alt="Search" width={16} height={16} className="opacity-60 group-focus-within:opacity-100" />
               </div>
 
-              {/* Filter By Container */}
-              <div className="flex flex-row items-center gap-2 relative">
-                <span className="hidden md:block text-preset-4 text-grey-500">Category</span>
-                <button 
-                  onClick={() => setIsCategoryOpen(!isCategoryOpen)}
-                  className="flex items-center justify-center md:justify-between w-5 h-5 md:w-[177px] md:h-[45px] md:px-5 md:py-3 md:border md:border-grey-500 md:rounded-lg bg-transparent md:bg-white cursor-pointer hover:border-grey-900 group transition-colors" 
-                  aria-label="Filter"
-                >
-                  <Image src="/assets/images/icon-filter-mobile.svg" alt="Filter" width={20} height={20} className="md:hidden" />
-                  <span className="hidden md:block text-preset-4 text-grey-900">{activeCategory}</span>
-                  <Image src="/assets/images/icon-caret-down.svg" alt="Caret" width={12} height={12} className={`hidden md:block transition-transform duration-300 ${isCategoryOpen ? "rotate-180" : ""}`} />
-                </button>
+              <div className="flex flex-row justify-end items-center gap-6 shrink-0 md:h-[45px]">
 
-                {/* Dropdown Menu */}
-                {isCategoryOpen && (
-                  <div className="absolute top-[30px] md:top-[55px] right-0 flex flex-col items-start p-3 md:py-3 md:px-5 gap-3 w-[177px] max-h-[300px] overflow-y-auto bg-white shadow-[0px_4px_24px_rgba(0,0,0,0.25)] rounded-lg z-50">
-                    {categoryOptions.map((opt, i) => (
-                      <div key={opt} className="flex flex-col w-full gap-3">
-                        <button
-                          onClick={() => { setActiveCategory(opt); setIsCategoryOpen(false); }}
-                          className="flex flex-row items-center w-full bg-transparent border-none p-0 cursor-pointer text-left hover:opacity-80 transition-opacity"
-                        >
-                          <span className={`w-full ${activeCategory === opt ? "text-preset-4-bold text-grey-900" : "text-preset-4 text-grey-900"}`}>{opt}</span>
-                        </button>
-                        {i < categoryOptions.length - 1 && <div className="w-full h-[1px] border-b border-[#F2F2F2]"></div>}
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
+                {/* Sort By Container */}
+                <div className="flex flex-row items-center gap-2 relative">
+                  <span className="hidden md:block text-preset-4 text-grey-500">Sort by</span>
+                  <button
+                    onClick={() => setIsSortOpen(!isSortOpen)}
+                    className="flex items-center justify-center md:justify-between w-5 h-5 md:w-[114px] md:h-[45px] md:px-5 md:py-3 md:border md:border-grey-500 md:rounded-lg bg-transparent md:bg-white cursor-pointer hover:border-grey-900 group transition-colors"
+                    aria-label="Sort"
+                  >
+                    <Image src="/assets/images/icon-sort-mobile.svg" alt="Sort" width={20} height={20} className="md:hidden" />
+                    <span className="hidden md:block text-preset-4 text-grey-900">{activeSort}</span>
+                    <Image src="/assets/images/icon-caret-down.svg" alt="Caret" width={12} height={12} className={`hidden md:block transition-transform duration-300 ${isSortOpen ? "rotate-180" : ""}`} />
+                  </button>
 
-            </div>
-          </div>
-
-          <div className="flex flex-col items-start gap-4 w-full">
-            {txns.map((txn, index) => (
-              <div key={index} className="flex flex-col w-full gap-4">
-                <div className="flex flex-row justify-between items-center w-full">
-                  <div className="flex flex-row items-center gap-3">
-                    <div className="w-8 h-8 rounded-full overflow-hidden relative shrink-0">
-                      <Image src={txn.img} alt={txn.name} fill sizes="32px" className="object-cover" />
+                  {/* Dropdown Menu */}
+                  {isSortOpen && (
+                    <div className="absolute top-[30px] md:top-[55px] right-0 flex flex-col items-start p-3 md:py-3 md:px-5 gap-3 w-[114px] bg-white shadow-[0px_4px_24px_rgba(0,0,0,0.25)] rounded-lg z-50">
+                      {sortOptions.map((opt, i) => (
+                        <div key={opt} className="flex flex-col w-full gap-3">
+                          <button
+                            onClick={() => { setActiveSort(opt); setIsSortOpen(false); }}
+                            className="flex flex-row items-center w-full bg-transparent border-none p-0 cursor-pointer text-left hover:opacity-80 transition-opacity"
+                          >
+                            <span className={`w-full ${activeSort === opt ? "text-preset-4-bold text-grey-900" : "text-preset-4 text-grey-900"}`}>{opt}</span>
+                          </button>
+                          {i < sortOptions.length - 1 && <div className="w-full h-[1px] border-b border-[#F2F2F2]"></div>}
+                        </div>
+                      ))}
                     </div>
-                    <div className="flex flex-col justify-center items-start gap-1">
-                      <h2 className="text-preset-4-bold text-grey-900">{txn.name}</h2>
-                      <p className="text-preset-5 text-grey-500">{txn.category}</p>
-                    </div>
-                  </div>
-
-                  <div className="flex flex-col justify-center items-end gap-1 shrink-0">
-                    <span className={`text-preset-4-bold ${txn.isPos ? 'text-green' : 'text-grey-900'}`}>{txn.isPos ? '+' : '-'}{formatCurrency(txn.amount)}</span>
-                    <span className="text-preset-5 text-grey-500">{txn.date}</span>
-                  </div>
+                  )}
                 </div>
-                {index < txns.length - 1 && <div className="w-full h-[1px] bg-grey-100"></div>}
+
+                {/* Filter By Container */}
+                <div className="flex flex-row items-center gap-2 relative">
+                  <span className="hidden md:block text-preset-4 text-grey-500">Category</span>
+                  <button
+                    onClick={() => setIsCategoryOpen(!isCategoryOpen)}
+                    className="flex items-center justify-center md:justify-between w-5 h-5 md:w-[177px] md:h-[45px] md:px-5 md:py-3 md:border md:border-grey-500 md:rounded-lg bg-transparent md:bg-white cursor-pointer hover:border-grey-900 group transition-colors"
+                    aria-label="Filter"
+                  >
+                    <Image src="/assets/images/icon-filter-mobile.svg" alt="Filter" width={20} height={20} className="md:hidden" />
+                    <span className="hidden md:block text-preset-4 text-grey-900">{activeCategory}</span>
+                    <Image src="/assets/images/icon-caret-down.svg" alt="Caret" width={12} height={12} className={`hidden md:block transition-transform duration-300 ${isCategoryOpen ? "rotate-180" : ""}`} />
+                  </button>
+
+                  {/* Dropdown Menu */}
+                  {isCategoryOpen && (
+                    <div className="absolute top-[30px] md:top-[55px] right-0 flex flex-col items-start p-3 md:py-3 md:px-5 gap-3 w-[177px] max-h-[300px] overflow-y-auto bg-white shadow-[0px_4px_24px_rgba(0,0,0,0.25)] rounded-lg z-50">
+                      {categoryOptions.map((opt, i) => (
+                        <div key={opt} className="flex flex-col w-full gap-3">
+                          <button
+                            onClick={() => { setActiveCategory(opt); setIsCategoryOpen(false); }}
+                            className="flex flex-row items-center w-full bg-transparent border-none p-0 cursor-pointer text-left hover:opacity-80 transition-opacity"
+                          >
+                            <span className={`w-full ${activeCategory === opt ? "text-preset-4-bold text-grey-900" : "text-preset-4 text-grey-900"}`}>{opt}</span>
+                          </button>
+                          {i < categoryOptions.length - 1 && <div className="w-full h-[1px] border-b border-[#F2F2F2]"></div>}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
               </div>
-            ))}
-          </div>
-
-          <div className="flex flex-row justify-between items-center pt-6 w-full">
-            <button className="flex justify-center items-center w-[48px] h-10 border border-grey-500 rounded-lg bg-white cursor-pointer hover:bg-beige-100 transition-colors">
-              <Image src="/assets/images/icon-caret-left.svg" alt="Previous" width={16} height={16} className="rotate-0" />
-            </button>
-
-            <div className="flex flex-row items-center gap-2">
-              <button className="flex justify-center items-center w-10 h-10 bg-grey-900 text-white text-preset-4 rounded-lg cursor-pointer">1</button>
-              <button className="flex justify-center items-center w-10 h-10 bg-white border border-grey-500 text-grey-900 text-preset-4 rounded-lg cursor-pointer hover:bg-beige-100 transition-colors">2</button>
-              <button className="flex justify-center items-center w-10 h-10 bg-white border border-grey-500 text-grey-900 text-preset-4 rounded-lg cursor-pointer hover:bg-beige-100 transition-colors">3</button>
             </div>
 
-            <button className="flex justify-center items-center w-[48px] h-10 border border-grey-500 rounded-lg bg-white cursor-pointer hover:bg-beige-100 transition-colors">
-              <Image src="/assets/images/icon-caret-right.svg" alt="Next" width={16} height={16} className="rotate-0" />
-            </button>
+            <div className="flex flex-col items-start gap-4 w-full">
+              {txns.map((txn, index) => (
+                <div key={index} className="flex flex-col w-full gap-4">
+                  <div className="flex flex-row justify-between items-center w-full">
+                    <div className="flex flex-row items-center gap-3">
+                      <div className="w-8 h-8 rounded-full overflow-hidden relative shrink-0">
+                        <Image src={txn.img} alt={txn.name} fill sizes="32px" className="object-cover" />
+                      </div>
+                      <div className="flex flex-col justify-center items-start gap-1">
+                        <h2 className="text-preset-4-bold text-grey-900">{txn.name}</h2>
+                        <p className="text-preset-5 text-grey-500">{txn.category}</p>
+                      </div>
+                    </div>
+
+                    <div className="flex flex-col justify-center items-end gap-1 shrink-0 overflow-hidden">
+                      <SmartAmount 
+                        amount={formatCurrency(txn.amount)} 
+                        prefix={txn.isPos ? '+' : '-'}
+                        className={`text-preset-4-bold ${txn.isPos ? 'text-green' : 'text-grey-900'} text-right`} 
+                      />
+                      <span className="text-preset-5 text-grey-500">{txn.date}</span>
+                    </div>
+                  </div>
+                  {index < txns.length - 1 && <div className="w-full h-[1px] bg-grey-100"></div>}
+                </div>
+              ))}
+            </div>
+
+            <div className="flex flex-row justify-between items-center pt-6 w-full">
+              <button className="flex justify-center items-center w-[48px] h-10 border border-grey-500 rounded-lg bg-white cursor-pointer hover:bg-beige-100 transition-colors">
+                <Image src="/assets/images/icon-caret-left.svg" alt="Previous" width={16} height={16} className="rotate-0" />
+              </button>
+
+              <div className="flex flex-row items-center gap-2">
+                <button className="flex justify-center items-center w-10 h-10 bg-grey-900 text-white text-preset-4 rounded-lg cursor-pointer">1</button>
+                <button className="flex justify-center items-center w-10 h-10 bg-white border border-grey-500 text-grey-900 text-preset-4 rounded-lg cursor-pointer hover:bg-beige-100 transition-colors">2</button>
+                <button className="flex justify-center items-center w-10 h-10 bg-white border border-grey-500 text-grey-900 text-preset-4 rounded-lg cursor-pointer hover:bg-beige-100 transition-colors">3</button>
+              </div>
+
+              <button className="flex justify-center items-center w-[48px] h-10 border border-grey-500 rounded-lg bg-white cursor-pointer hover:bg-beige-100 transition-colors">
+                <Image src="/assets/images/icon-caret-right.svg" alt="Next" width={16} height={16} className="rotate-0" />
+              </button>
+            </div>
           </div>
-        </div>
         </div>
       </main>
 
@@ -173,9 +178,9 @@ export default function TransactionsPage() {
         <MobileSidebar />
       </div>
 
-      <ProfileModal 
-        isOpen={isProfileModalOpen} 
-        onClose={() => setIsProfileModalOpen(false)} 
+      <ProfileModal
+        isOpen={isProfileModalOpen}
+        onClose={() => setIsProfileModalOpen(false)}
       />
     </div>
   );
