@@ -41,11 +41,11 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Dashoard Content Split (Left & Right Sides) */}
-        <div className="flex flex-col lg:flex-row items-start gap-6 w-full max-w-[480px] md:max-w-[688px] lg:max-w-[1060px]">
+        {/* Dashboard Content Split (Left & Right Sides) */}
+        <div className="flex flex-col xl:flex-row items-start gap-6 w-full max-w-[480px] md:max-w-[688px] lg:max-w-[1060px]">
 
           {/* Left Side */}
-          <div className="flex flex-col items-start gap-4 md:gap-6 w-full flex-1 lg:max-w-[608px]">
+          <div className="flex flex-col items-start gap-4 md:gap-6 w-full flex-1 xl:max-w-[608px]">
 
             {/* Saving Pot */}
             <div className="flex flex-col items-start p-5 md:p-8 gap-5 w-full bg-white rounded-xl">
@@ -142,7 +142,7 @@ export default function Home() {
                   <div key={index} className="flex flex-col w-full">
                     <div className="flex flex-row justify-between items-center py-3 w-full">
                       <div className="flex flex-row items-center gap-4">
-                        <div className="w-8 h-8 rounded-full bg-beige-100 overflow-hidden relative">
+                        <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-beige-100 overflow-hidden relative">
                           <Image
                             src={txn.img}
                             alt={txn.name}
@@ -167,7 +167,7 @@ export default function Home() {
           </div>
 
           {/* Right Side */}
-          <div className="flex flex-col items-start gap-4 md:gap-6 w-full flex-1 lg:max-w-[428px]">
+          <div className="flex flex-col items-start gap-4 md:gap-6 w-full flex-1 xl:max-w-[428px]">
 
             {/* My Budgets */}
             <div className="flex flex-col items-start p-5 md:p-8 gap-5 w-full bg-white rounded-xl">
@@ -256,7 +256,7 @@ export default function Home() {
                 </button>
               </div>
 
-              <div className="flex flex-col items-start gap-3 md:gap-4 w-full">
+              <div className="flex flex-col items-start gap-3 w-full">
                 {/* Total */}
                 <div className="flex flex-row justify-between items-center py-5 px-4 w-full bg-beige-100 border-l-[4px] border-green rounded-lg">
                   <span className="text-preset-4 text-grey-500">Total recurring bills</span>

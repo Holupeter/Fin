@@ -3,8 +3,15 @@
 import Image from "next/image";
 import MobileSidebar from "@/components/MobileSidebar";
 import DesktopSidebar from "@/components/DesktopSidebar";
+import { useState } from "react";
 
 export default function TransactionsPage() {
+  const [isSortOpen, setIsSortOpen] = useState(false);
+  const [activeSort, setActiveSort] = useState("Latest");
+  const sortOptions = ["Latest", "Oldest", "A to Z", "Z to A", "Highest", "Lowest"];
+  const [isCategoryOpen, setIsCategoryOpen] = useState(false);
+  const [activeCategory, setActiveCategory] = useState("All Transactions");
+  const categoryOptions = ["All Transactions", "Entertainment", "Bills", "Groceries", "Dining Out", "Transportation", "Personal Care", "Education", "Lifestyle", "Shopping", "General"];
   const txns = [
     { name: "Bravo Zen Spa", category: "Personal Care", amount: "-$25.00", date: "29 Aug 2024, 21:45", img: "/assets/images/avatars/emma-richardson.jpg", isPos: false },
     { name: "Alpha Analytics", category: "General", amount: "+$450.00", date: "27 Aug 2024, 15:00", img: "/assets/images/avatars/savory-bites-bistro.jpg", isPos: true },
@@ -41,13 +48,70 @@ export default function TransactionsPage() {
               <Image src="/assets/images/icon-search.svg" alt="Search" width={16} height={16} className="opacity-60 group-focus-within:opacity-100" />
             </div>
 
-            <div className="flex flex-row justify-end items-center gap-6 shrink-0 h-5">
-              <button className="flex items-center justify-center w-5 h-5 bg-transparent border-none p-0 cursor-pointer" aria-label="Sort">
-                <Image src="/assets/images/icon-sort-mobile.svg" alt="Sort" width={20} height={20} />
-              </button>
-              <button className="flex items-center justify-center w-5 h-5 bg-transparent border-none p-0 cursor-pointer" aria-label="Filter">
-                <Image src="/assets/images/icon-filter-mobile.svg" alt="Filter" width={20} height={20} />
-              </button>
+            <div className="flex flex-row justify-end items-center gap-6 shrink-0 md:h-[45px]">
+              
+              {/* Sort By Container */}
+              <div className="flex flex-row items-center gap-2 relative">
+                <span className="hidden md:block text-preset-4 text-grey-500">Sort by</span>
+                <button 
+                  onClick={() => setIsSortOpen(!isSortOpen)}
+                  className="flex items-center justify-center md:justify-between w-5 h-5 md:w-[114px] md:h-[45px] md:px-5 md:py-3 md:border md:border-grey-500 md:rounded-lg bg-transparent md:bg-white cursor-pointer hover:border-grey-900 group transition-colors" 
+                  aria-label="Sort"
+                >
+                  <Image src="/assets/images/icon-sort-mobile.svg" alt="Sort" width={20} height={20} className="md:hidden" />
+                  <span className="hidden md:block text-preset-4 text-grey-900">{activeSort}</span>
+                  <Image src="/assets/images/icon-caret-down.svg" alt="Caret" width={12} height={12} className={`hidden md:block transition-transform duration-300 ${isSortOpen ? "rotate-180" : ""}`} />
+                </button>
+
+                {/* Dropdown Menu */}
+                {isSortOpen && (
+                  <div className="absolute top-[30px] md:top-[55px] right-0 flex flex-col items-start p-3 md:py-3 md:px-5 gap-3 w-[114px] bg-white shadow-[0px_4px_24px_rgba(0,0,0,0.25)] rounded-lg z-50">
+                    {sortOptions.map((opt, i) => (
+                      <div key={opt} className="flex flex-col w-full gap-3">
+                        <button
+                          onClick={() => { setActiveSort(opt); setIsSortOpen(false); }}
+                          className="flex flex-row items-center w-full bg-transparent border-none p-0 cursor-pointer text-left hover:opacity-80 transition-opacity"
+                        >
+                          <span className={`w-full ${activeSort === opt ? "text-preset-4-bold text-grey-900" : "text-preset-4 text-grey-900"}`}>{opt}</span>
+                        </button>
+                        {i < sortOptions.length - 1 && <div className="w-full h-[1px] border-b border-[#F2F2F2]"></div>}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Filter By Container */}
+              <div className="flex flex-row items-center gap-2 relative">
+                <span className="hidden md:block text-preset-4 text-grey-500">Category</span>
+                <button 
+                  onClick={() => setIsCategoryOpen(!isCategoryOpen)}
+                  className="flex items-center justify-center md:justify-between w-5 h-5 md:w-[177px] md:h-[45px] md:px-5 md:py-3 md:border md:border-grey-500 md:rounded-lg bg-transparent md:bg-white cursor-pointer hover:border-grey-900 group transition-colors" 
+                  aria-label="Filter"
+                >
+                  <Image src="/assets/images/icon-filter-mobile.svg" alt="Filter" width={20} height={20} className="md:hidden" />
+                  <span className="hidden md:block text-preset-4 text-grey-900">{activeCategory}</span>
+                  <Image src="/assets/images/icon-caret-down.svg" alt="Caret" width={12} height={12} className={`hidden md:block transition-transform duration-300 ${isCategoryOpen ? "rotate-180" : ""}`} />
+                </button>
+
+                {/* Dropdown Menu */}
+                {isCategoryOpen && (
+                  <div className="absolute top-[30px] md:top-[55px] right-0 flex flex-col items-start p-3 md:py-3 md:px-5 gap-3 w-[177px] max-h-[300px] overflow-y-auto bg-white shadow-[0px_4px_24px_rgba(0,0,0,0.25)] rounded-lg z-50">
+                    {categoryOptions.map((opt, i) => (
+                      <div key={opt} className="flex flex-col w-full gap-3">
+                        <button
+                          onClick={() => { setActiveCategory(opt); setIsCategoryOpen(false); }}
+                          className="flex flex-row items-center w-full bg-transparent border-none p-0 cursor-pointer text-left hover:opacity-80 transition-opacity"
+                        >
+                          <span className={`w-full ${activeCategory === opt ? "text-preset-4-bold text-grey-900" : "text-preset-4 text-grey-900"}`}>{opt}</span>
+                        </button>
+                        {i < categoryOptions.length - 1 && <div className="w-full h-[1px] border-b border-[#F2F2F2]"></div>}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
             </div>
           </div>
 
