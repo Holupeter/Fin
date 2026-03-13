@@ -6,9 +6,11 @@ import { useState } from "react";
 import MobileSidebar from "@/components/MobileSidebar";
 import DesktopSidebar from "@/components/DesktopSidebar";
 import ProfileModal from "@/components/ProfileModal";
+import { useCurrency } from "@/providers/CurrencyProvider";
 
 export default function Home() {
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+  const { formatCurrency } = useCurrency();
   return (
     <div className="flex flex-col lg:flex-row items-start w-full min-h-screen bg-beige-100 relative">
       {/* Desktop Sidebar (hidden on mobile, visible on lg) - added for structure consistency */}
@@ -39,19 +41,19 @@ export default function Home() {
           {/* Current Balance */}
           <div className="flex flex-col items-start p-5 md:p-6 gap-3 w-full bg-grey-900 rounded-xl flex-1">
             <span className="text-preset-4 text-white">Current Balance</span>
-            <span className="text-preset-1 text-white">$1,836.00</span>
+            <span className="text-preset-1 text-white">{formatCurrency(1836)}</span>
           </div>
 
           {/* Income */}
           <div className="flex flex-col items-start p-5 md:p-6 gap-3 w-full bg-white rounded-xl flex-1">
             <span className="text-preset-4 text-grey-500">Income</span>
-            <span className="text-preset-1 text-grey-900">$2,350.00</span>
+            <span className="text-preset-1 text-grey-900">{formatCurrency(2350)}</span>
           </div>
 
           {/* Expenses */}
           <div className="flex flex-col items-start p-5 md:p-6 gap-3 w-full bg-white rounded-xl flex-1">
             <span className="text-preset-4 text-grey-500">Expenses</span>
-            <span className="text-preset-1 text-grey-900">$514.00</span>
+            <span className="text-preset-1 text-grey-900">{formatCurrency(514)}</span>
           </div>
         </div>
 
@@ -83,7 +85,7 @@ export default function Home() {
                   </div>
                   <div className="flex flex-col items-start gap-1 md:gap-[11px]">
                     <span className="text-preset-4 text-grey-500">Total Saved</span>
-                    <span className="text-preset-1 text-grey-900">$850</span>
+                    <span className="text-preset-1 text-grey-900">{formatCurrency(850)}</span>
                   </div>
                 </div>
 
@@ -95,7 +97,7 @@ export default function Home() {
                       <div className="w-1 h-11 bg-green rounded-lg"></div>
                       <div className="flex flex-col justify-center gap-1">
                         <span className="text-preset-5 text-grey-500">Savings</span>
-                        <span className="text-preset-4-bold text-grey-900">$159</span>
+                        <span className="text-preset-4-bold text-grey-900">{formatCurrency(159)}</span>
                       </div>
                     </div>
                     {/* Item 2 */}
@@ -103,7 +105,7 @@ export default function Home() {
                       <div className="w-1 h-11 bg-cyan rounded-lg"></div>
                       <div className="flex flex-col justify-center gap-1">
                         <span className="text-preset-5 text-grey-500">Christmas Gift</span>
-                        <span className="text-preset-4-bold text-grey-900">$40</span>
+                        <span className="text-preset-4-bold text-grey-900">{formatCurrency(40)}</span>
                       </div>
                     </div>
                   </div>
@@ -114,7 +116,7 @@ export default function Home() {
                       <div className="w-1 h-11 bg-navy rounded-lg"></div>
                       <div className="flex flex-col justify-center gap-1">
                         <span className="text-preset-5 text-grey-500">Concert Ticket</span>
-                        <span className="text-preset-4-bold text-grey-900">$110</span>
+                        <span className="text-preset-4-bold text-grey-900">{formatCurrency(110)}</span>
                       </div>
                     </div>
                     {/* Item 4 */}
@@ -122,7 +124,7 @@ export default function Home() {
                       <div className="w-1 h-11 bg-yellow rounded-lg"></div>
                       <div className="flex flex-col justify-center gap-1">
                         <span className="text-preset-5 text-grey-500">New Laptop</span>
-                        <span className="text-preset-4-bold text-grey-900">$10</span>
+                        <span className="text-preset-4-bold text-grey-900">{formatCurrency(10)}</span>
                       </div>
                     </div>
                   </div>
@@ -147,11 +149,11 @@ export default function Home() {
               {/* Transaction List */}
               <div className="flex flex-col items-start w-full">
                 {[
-                  { name: "Bravo Zen Spa", amount: "-$25.00", date: "29 Aug 2024", img: "/assets/images/avatars/emma-richardson.jpg" },
-                  { name: "Alpha Analytics", amount: "+$450.00", date: "27 Aug 2024", img: "/assets/images/avatars/savory-bites-bistro.jpg", isPos: true },
-                  { name: "Echo Game Store", amount: "-$21.50", date: "22 Aug 2024", img: "/assets/images/avatars/daniel-carter.jpg" },
-                  { name: "Food Merchant", amount: "-$21.50", date: "20 Aug 2024", img: "/assets/images/avatars/sun-park.jpg" },
-                  { name: "Delta Taxi", amount: "-$15.00", date: "19 Aug 2024", img: "/assets/images/avatars/urban-services-hub.jpg" },
+                  { name: "Bravo Zen Spa", amount: 25.00, date: "29 Aug 2024", img: "/assets/images/avatars/emma-richardson.jpg", isPos: false },
+                  { name: "Alpha Analytics", amount: 450.00, date: "27 Aug 2024", img: "/assets/images/avatars/savory-bites-bistro.jpg", isPos: true },
+                  { name: "Echo Game Store", amount: 21.50, date: "22 Aug 2024", img: "/assets/images/avatars/daniel-carter.jpg", isPos: false },
+                  { name: "Food Merchant", amount: 21.50, date: "20 Aug 2024", img: "/assets/images/avatars/sun-park.jpg", isPos: false },
+                  { name: "Delta Taxi", amount: 15.00, date: "19 Aug 2024", img: "/assets/images/avatars/urban-services-hub.jpg", isPos: false },
                 ].map((txn, index, array) => (
                   <div key={index} className="flex flex-col w-full">
                     <div className="flex flex-row justify-between items-center py-3 w-full">
@@ -168,7 +170,7 @@ export default function Home() {
                         <span className="text-preset-4-bold text-grey-900">{txn.name}</span>
                       </div>
                       <div className="flex flex-col justify-center items-end gap-2">
-                        <span className={`text-preset-4-bold ${txn.isPos ? 'text-green' : 'text-grey-900'}`}>{txn.amount}</span>
+                        <span className={`text-preset-4-bold ${txn.isPos ? 'text-green' : 'text-grey-900'}`}>{txn.isPos ? '+' : '-'}{formatCurrency(txn.amount)}</span>
                         <span className="text-preset-5 text-grey-500">{txn.date}</span>
                       </div>
                     </div>
@@ -208,8 +210,8 @@ export default function Home() {
                   ></div>
                   <div className="absolute w-[187.5px] h-[187.5px] bg-white opacity-25 rounded-full mix-blend-screen"></div>
                   <div className="absolute w-[162px] h-[162px] bg-white rounded-full flex flex-col justify-center items-center gap-2">
-                    <span className="text-preset-1 text-grey-900">$407</span>
-                    <span className="text-preset-5 text-grey-500">of $975 limit</span>
+                    <span className="text-preset-1 text-grey-900">{formatCurrency(407)}</span>
+                    <span className="text-preset-5 text-grey-500">of {formatCurrency(975)} limit</span>
                   </div>
                 </div>
 
@@ -221,7 +223,7 @@ export default function Home() {
                       <div className="w-1 h-11 bg-green rounded-lg"></div>
                       <div className="flex flex-col justify-center gap-1">
                         <span className="text-preset-5 text-grey-500">Entertainment</span>
-                        <span className="text-preset-4-bold text-grey-900">$25.00</span>
+                        <span className="text-preset-4-bold text-grey-900">{formatCurrency(25)}</span>
                       </div>
                     </div>
                     {/* Item 2 */}
@@ -229,7 +231,7 @@ export default function Home() {
                       <div className="w-1 h-11 bg-cyan rounded-lg"></div>
                       <div className="flex flex-col justify-center gap-1">
                         <span className="text-preset-5 text-grey-500">Dining Out</span>
-                        <span className="text-preset-4-bold text-grey-900">$67.00</span>
+                        <span className="text-preset-4-bold text-grey-900">{formatCurrency(67)}</span>
                       </div>
                     </div>
                   </div>
@@ -240,7 +242,7 @@ export default function Home() {
                       <div className="w-1 h-11 bg-navy rounded-lg"></div>
                       <div className="flex flex-col justify-center gap-1">
                         <span className="text-preset-5 text-grey-500">Personal Care</span>
-                        <span className="text-preset-4-bold text-grey-900">$65.00</span>
+                        <span className="text-preset-4-bold text-grey-900">{formatCurrency(65)}</span>
                       </div>
                     </div>
                     {/* Item 4 */}
@@ -248,7 +250,7 @@ export default function Home() {
                       <div className="w-1 h-11 bg-yellow rounded-lg"></div>
                       <div className="flex flex-col justify-center gap-1">
                         <span className="text-preset-5 text-grey-500">Bills</span>
-                        <span className="text-preset-4-bold text-grey-900">$250.00</span>
+                        <span className="text-preset-4-bold text-grey-900">{formatCurrency(250)}</span>
                       </div>
                     </div>
                   </div>
@@ -274,17 +276,17 @@ export default function Home() {
                 {/* Total */}
                 <div className="flex flex-row justify-between items-center py-5 px-4 w-full bg-beige-100 border-l-[4px] border-green rounded-lg">
                   <span className="text-preset-4 text-grey-500">Total recurring bills</span>
-                  <span className="text-preset-4-bold text-grey-900">$1,550.00</span>
+                  <span className="text-preset-4-bold text-grey-900">{formatCurrency(1550)}</span>
                 </div>
                 {/* Remaining */}
                 <div className="flex flex-row justify-between items-center py-5 px-4 w-full bg-beige-100 border-l-[4px] border-yellow rounded-lg">
                   <span className="text-preset-4 text-grey-500">Remaining this month</span>
-                  <span className="text-preset-4-bold text-grey-900">$1,230.00</span>
+                  <span className="text-preset-4-bold text-grey-900">{formatCurrency(1230)}</span>
                 </div>
                 {/* Due Soon */}
                 <div className="flex flex-row justify-between items-center py-5 px-4 w-full bg-beige-100 border-l-[4px] border-cyan rounded-lg">
                   <span className="text-preset-4 text-grey-500">Total bills due soon</span>
-                  <span className="text-preset-4-bold text-grey-900">$40.00</span>
+                  <span className="text-preset-4-bold text-grey-900">{formatCurrency(40)}</span>
                 </div>
               </div>
             </div>

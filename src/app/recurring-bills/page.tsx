@@ -1,8 +1,15 @@
+"use client";
+
 import DesktopSidebar from "@/components/DesktopSidebar";
 import MobileSidebar from "@/components/MobileSidebar";
 import Image from "next/image";
+import { useState } from "react";
+import ProfileModal from "@/components/ProfileModal";
+import { useCurrency } from "@/providers/CurrencyProvider";
 
 export default function RecurringBillsPage() {
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+  const { formatCurrency } = useCurrency();
   const bills = [
     { title: "Elevate Education", date: "1 Aug 2024, 13:44", amount: 250.00, logo: "/assets/images/avatars/alpha-analytics.jpg", isDueSoon: false },
     { title: "Bravo Zen Spa", date: "1 Aug 2024, 13:44", amount: 250.00, logo: "/assets/images/avatars/bravo-zen-spa.jpg", isDueSoon: false },
@@ -18,15 +25,23 @@ export default function RecurringBillsPage() {
     <div className="flex flex-col lg:flex-row items-start w-full min-h-screen bg-beige-100 relative">
       <DesktopSidebar />
 
-      <main className="flex flex-col items-center w-full flex-1 mb-[52px] lg:mb-0 max-w-[1140px] mx-auto pb-6 px-4 md:px-10 md:pb-8 lg:px-10 lg:pb-8">
+      <main className="flex flex-col items-center w-full flex-1 mb-[52px] lg:mb-0 max-w-[1140px] mx-auto">
         {/* Top Title */}
-        <div className="sticky top-0 z-10 flex flex-row items-center w-full bg-beige-100 py-6 md:py-8">
-          <div className="w-full max-w-[480px] md:max-w-[688px] lg:max-w-[1060px] mx-auto">
+        <div className="sticky top-0 z-10 flex flex-row items-center justify-center w-full bg-beige-100 px-4 pt-6 pb-6 md:px-10 md:pt-8 md:pb-8 lg:px-10 lg:pt-8 lg:pb-8">
+          <div className="flex flex-row items-center justify-between w-full max-w-[480px] md:max-w-[688px] lg:max-w-[1060px]">
             <h1 className="text-preset-1 text-grey-900">Recurring Bills</h1>
+            <button 
+              onClick={() => setIsProfileModalOpen(true)}
+              className="w-10 h-10 rounded-full bg-white overflow-hidden border border-grey-500 relative cursor-pointer opacity-90 hover:opacity-100 transition-opacity p-0 flex-shrink-0"
+              aria-label="Open Profile"
+            >
+              <Image src="/assets/images/avatars/emma-richardson.jpg" alt="Profile" fill sizes="40px" className="object-cover" />
+            </button>
           </div>
         </div>
 
-        <div className="flex flex-col lg:flex-row items-start gap-6 w-full max-w-[480px] md:max-w-none">
+        <div className="flex flex-col items-center w-full px-4 pb-6 md:px-10 md:pb-8 lg:px-10 lg:pb-8">
+          <div className="flex flex-col lg:flex-row items-start gap-6 w-full max-w-[480px] md:max-w-[688px] lg:max-w-[1060px]">
           {/* Bills Content */}
 
           {/* Left Side Equivalent (Tablet/Desktop) */}
@@ -38,7 +53,7 @@ export default function RecurringBillsPage() {
               </div>
               <div className="flex flex-col gap-3 w-full">
                 <span className="text-preset-4 text-white">Total bills</span>
-                <span className="text-preset-1 text-white">$1,550.00</span>
+                <span className="text-preset-1 text-white">{formatCurrency(1550)}</span>
               </div>
             </div>
 
@@ -50,17 +65,17 @@ export default function RecurringBillsPage() {
                 {/* Paid Bills */}
                 <div className="flex flex-row justify-between items-center py-4 w-full border-b border-grey-100 border-opacity-15">
                   <span className="text-preset-5 text-grey-500">Paid Bills</span>
-                  <span className="text-preset-5-bold text-grey-900">2 ($320.00)</span>
+                  <span className="text-preset-5-bold text-grey-900">2 ({formatCurrency(320)})</span>
                 </div>
                 {/* Total Upcoming */}
                 <div className="flex flex-row justify-between items-center py-4 w-full border-b border-grey-100 border-opacity-15">
                   <span className="text-preset-5 text-grey-500">Total Upcoming</span>
-                  <span className="text-preset-5-bold text-grey-900">6 ($1,230.00)</span>
+                  <span className="text-preset-5-bold text-grey-900">6 ({formatCurrency(1230)})</span>
                 </div>
                 {/* Due Soon */}
                 <div className="flex flex-row justify-between items-center pt-4 w-full">
                   <span className="text-preset-5 text-red text-opacity-80">Due soon</span>
-                  <span className="text-preset-5-bold text-red">2 ($40.00)</span>
+                  <span className="text-preset-5-bold text-red">2 ({formatCurrency(40)})</span>
                 </div>
               </div>
             </div>
@@ -101,12 +116,13 @@ export default function RecurringBillsPage() {
                            <span className={`text-preset-5 ${bill.isDueSoon ? 'text-green' : 'text-green'}`}>{bill.date}</span>
                            {bill.isDueSoon && <Image src="/assets/images/icon-bill-due.svg" alt="Due soon" width={16} height={16} className="md:hidden" />}
                         </div>
-                        <span className={`text-preset-4-bold ${bill.isDueSoon ? 'text-red' : 'text-grey-900'} md:w-[100px] md:text-right`}>${bill.amount.toFixed(2)}</span>
+                        <span className={`text-preset-4-bold ${bill.isDueSoon ? 'text-red' : 'text-grey-900'} md:w-[100px] md:text-right`}>{formatCurrency(bill.amount)}</span>
                      </div>
                   </div>
                ))}
             </div>
           </div>
+        </div>
         </div>
       </main>
 
@@ -114,6 +130,11 @@ export default function RecurringBillsPage() {
       <div className="lg:hidden w-full fixed bottom-0 left-0 bg-transparent z-50">
         <MobileSidebar />
       </div>
+
+      <ProfileModal 
+        isOpen={isProfileModalOpen} 
+        onClose={() => setIsProfileModalOpen(false)} 
+      />
     </div>
   );
 }

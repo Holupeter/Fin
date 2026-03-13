@@ -1,8 +1,15 @@
+"use client";
+
 import MobileSidebar from "@/components/MobileSidebar";
 import DesktopSidebar from "@/components/DesktopSidebar";
 import Image from "next/image";
+import { useState } from "react";
+import ProfileModal from "@/components/ProfileModal";
+import { useCurrency } from "@/providers/CurrencyProvider";
 
 export default function BudgetsPage() {
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+  const { formatCurrency } = useCurrency();
   return (
     <div className="flex flex-col lg:flex-row items-start w-full min-h-screen bg-beige-100 relative">
       <DesktopSidebar />
@@ -11,9 +18,18 @@ export default function BudgetsPage() {
         <div className="sticky top-0 z-10 flex flex-row items-center justify-center w-full bg-beige-100 px-4 pt-6 pb-6 md:px-10 md:pt-8 md:pb-8 lg:px-10 lg:pt-8 lg:pb-8">
           <div className="flex flex-row items-center justify-between w-full max-w-[480px] md:max-w-[688px] lg:max-w-[1060px]">
             <h1 className="text-preset-1 text-grey-900">Budgets</h1>
-            <button className="flex flex-row justify-center items-center px-4 h-[53px] bg-grey-900 text-white text-preset-4-bold rounded-lg cursor-pointer hover:bg-grey-500 transition-colors">
-              + Add New Budget
-            </button>
+            <div className="flex flex-row items-center gap-4">
+              <button className="flex flex-row justify-center items-center px-4 h-[53px] bg-grey-900 text-white text-preset-4-bold rounded-lg cursor-pointer hover:bg-grey-500 transition-colors">
+                + Add New Budget
+              </button>
+              <button 
+                onClick={() => setIsProfileModalOpen(true)}
+                className="w-10 h-10 rounded-full bg-white overflow-hidden border border-grey-500 relative cursor-pointer opacity-90 hover:opacity-100 transition-opacity p-0 flex-shrink-0"
+                aria-label="Open Profile"
+              >
+                <Image src="/assets/images/avatars/emma-richardson.jpg" alt="Profile" fill sizes="40px" className="object-cover" />
+              </button>
+            </div>
           </div>
         </div>
 
@@ -32,8 +48,8 @@ export default function BudgetsPage() {
                 ></div>
                 <div className="absolute w-[187.5px] h-[187.5px] bg-white opacity-25 rounded-full mix-blend-screen"></div>
                 <div className="absolute w-[162px] h-[162px] bg-white rounded-full flex flex-col justify-center items-center gap-2">
-                  <span className="text-preset-1 text-grey-900">$407</span>
-                  <span className="text-preset-5 text-grey-500">of $975 limit</span>
+                  <span className="text-preset-1 text-grey-900">{formatCurrency(407)}</span>
+                  <span className="text-preset-5 text-grey-500">of {formatCurrency(975)} limit</span>
                 </div>
               </div>
             </div>
@@ -50,8 +66,8 @@ export default function BudgetsPage() {
                     <span className="text-preset-4 text-grey-500">Entertainment</span>
                   </div>
                   <div className="flex flex-row items-center gap-2">
-                    <span className="text-preset-3 text-grey-900">$50.00</span>
-                    <span className="text-preset-5 text-grey-500">of $50.00</span>
+                    <span className="text-preset-3 text-grey-900">{formatCurrency(50)}</span>
+                    <span className="text-preset-5 text-grey-500">of {formatCurrency(50)}</span>
                   </div>
                 </div>
                 <div className="w-full h-[1px] bg-grey-100"></div>
@@ -63,8 +79,8 @@ export default function BudgetsPage() {
                     <span className="text-preset-4 text-grey-500">Bills</span>
                   </div>
                   <div className="flex flex-row items-center gap-2">
-                    <span className="text-preset-3 text-grey-900">$250.00</span>
-                    <span className="text-preset-5 text-grey-500">of $750.00</span>
+                    <span className="text-preset-3 text-grey-900">{formatCurrency(250)}</span>
+                    <span className="text-preset-5 text-grey-500">of {formatCurrency(750)}</span>
                   </div>
                 </div>
                 <div className="w-full h-[1px] bg-grey-100"></div>
@@ -76,8 +92,8 @@ export default function BudgetsPage() {
                     <span className="text-preset-4 text-grey-500">Dining Out</span>
                   </div>
                   <div className="flex flex-row items-center gap-2">
-                    <span className="text-preset-3 text-grey-900">$67.00</span>
-                    <span className="text-preset-5 text-grey-500">of $75.00</span>
+                    <span className="text-preset-3 text-grey-900">{formatCurrency(67)}</span>
+                    <span className="text-preset-5 text-grey-500">of {formatCurrency(75)}</span>
                   </div>
                 </div>
                 <div className="w-full h-[1px] bg-grey-100"></div>
@@ -89,8 +105,8 @@ export default function BudgetsPage() {
                     <span className="text-preset-4 text-grey-500">Personal Care</span>
                   </div>
                   <div className="flex flex-row items-center gap-2">
-                    <span className="text-preset-3 text-grey-900">$65.00</span>
-                    <span className="text-preset-5 text-grey-500">of $100.00</span>
+                    <span className="text-preset-3 text-grey-900">{formatCurrency(65)}</span>
+                    <span className="text-preset-5 text-grey-500">of {formatCurrency(100)}</span>
                   </div>
                 </div>
               </div>
@@ -113,7 +129,7 @@ export default function BudgetsPage() {
 
               <div className="flex flex-col items-start gap-4 w-full">
                 <div className="flex flex-row items-center gap-4 w-full">
-                  <span className="text-preset-4 text-grey-500">Maximum of $50.00</span>
+                  <span className="text-preset-4 text-grey-500">Maximum of {formatCurrency(50)}</span>
                 </div>
                 
                 {/* Progress Bar */}
@@ -127,14 +143,14 @@ export default function BudgetsPage() {
                     <div className="w-1 h-[43px] bg-green rounded-lg"></div>
                     <div className="flex flex-col justify-center gap-1">
                       <span className="text-preset-5 text-grey-500">Spent</span>
-                      <span className="text-preset-4-bold text-grey-900">$50.00</span>
+                      <span className="text-preset-4-bold text-grey-900">{formatCurrency(50)}</span>
                     </div>
                   </div>
                   <div className="flex flex-row items-center gap-4 flex-1">
                     <div className="w-1 h-[43px] bg-beige-100 rounded-lg"></div>
                     <div className="flex flex-col justify-center gap-1">
                       <span className="text-preset-5 text-grey-500">Free</span>
-                      <span className="text-preset-4-bold text-grey-900">$0.00</span>
+                      <span className="text-preset-4-bold text-grey-900">{formatCurrency(0)}</span>
                     </div>
                   </div>
                 </div>
@@ -211,7 +227,7 @@ export default function BudgetsPage() {
 
               <div className="flex flex-col items-start gap-4 w-full">
                 <div className="flex flex-row items-center gap-4 w-full">
-                  <span className="text-preset-4 text-grey-500">Maximum of $750.00</span>
+                  <span className="text-preset-4 text-grey-500">Maximum of {formatCurrency(750)}</span>
                 </div>
                 
                 {/* Progress Bar */}
@@ -225,14 +241,14 @@ export default function BudgetsPage() {
                     <div className="w-1 h-[43px] bg-cyan rounded-lg"></div>
                     <div className="flex flex-col justify-center gap-1">
                       <span className="text-preset-5 text-grey-500">Spent</span>
-                      <span className="text-preset-4-bold text-grey-900">$250.00</span>
+                      <span className="text-preset-4-bold text-grey-900">{formatCurrency(250)}</span>
                     </div>
                   </div>
                   <div className="flex flex-row items-center gap-4 flex-1">
                     <div className="w-1 h-[43px] bg-beige-100 rounded-lg"></div>
                     <div className="flex flex-col justify-center gap-1">
                       <span className="text-preset-5 text-grey-500">Free</span>
-                      <span className="text-preset-4-bold text-grey-900">$500.00</span>
+                      <span className="text-preset-4-bold text-grey-900">{formatCurrency(500)}</span>
                     </div>
                   </div>
                 </div>
@@ -296,7 +312,7 @@ export default function BudgetsPage() {
 
               <div className="flex flex-col items-start gap-4 w-full">
                 <div className="flex flex-row items-center gap-4 w-full">
-                  <span className="text-preset-4 text-grey-500">Maximum of $75.00</span>
+                  <span className="text-preset-4 text-grey-500">Maximum of {formatCurrency(75)}</span>
                 </div>
                 
                 {/* Progress Bar */}
@@ -310,14 +326,14 @@ export default function BudgetsPage() {
                     <div className="w-1 h-[43px] bg-yellow rounded-lg"></div>
                     <div className="flex flex-col justify-center gap-1">
                       <span className="text-preset-5 text-grey-500">Spent</span>
-                      <span className="text-preset-4-bold text-grey-900">$67.00</span>
+                      <span className="text-preset-4-bold text-grey-900">{formatCurrency(67)}</span>
                     </div>
                   </div>
                   <div className="flex flex-row items-center gap-4 flex-1">
                     <div className="w-1 h-[43px] bg-beige-100 rounded-lg"></div>
                     <div className="flex flex-col justify-center gap-1">
                       <span className="text-preset-5 text-grey-500">Free</span>
-                      <span className="text-preset-4-bold text-grey-900">$8.00</span>
+                      <span className="text-preset-4-bold text-grey-900">{formatCurrency(8)}</span>
                     </div>
                   </div>
                 </div>
@@ -397,7 +413,7 @@ export default function BudgetsPage() {
 
               <div className="flex flex-col items-start gap-4 w-full">
                 <div className="flex flex-row items-center gap-4 w-full">
-                  <span className="text-preset-4 text-grey-500">Maximum of $100.00</span>
+                  <span className="text-preset-4 text-grey-500">Maximum of {formatCurrency(100)}</span>
                 </div>
                 
                 {/* Progress Bar */}
@@ -411,14 +427,14 @@ export default function BudgetsPage() {
                     <div className="w-1 h-[43px] bg-navy rounded-lg"></div>
                     <div className="flex flex-col justify-center gap-1">
                       <span className="text-preset-5 text-grey-500">Spent</span>
-                      <span className="text-preset-4-bold text-grey-900">$65.00</span>
+                      <span className="text-preset-4-bold text-grey-900">{formatCurrency(65)}</span>
                     </div>
                   </div>
                   <div className="flex flex-row items-center gap-4 flex-1">
                     <div className="w-1 h-[43px] bg-beige-100 rounded-lg"></div>
                     <div className="flex flex-col justify-center gap-1">
                       <span className="text-preset-5 text-grey-500">Free</span>
-                      <span className="text-preset-4-bold text-grey-900">$35.00</span>
+                      <span className="text-preset-4-bold text-grey-900">{formatCurrency(35)}</span>
                     </div>
                   </div>
                 </div>
@@ -492,6 +508,11 @@ export default function BudgetsPage() {
       <div className="lg:hidden w-full fixed bottom-0 left-0 bg-transparent z-50">
         <MobileSidebar />
       </div>
+
+      <ProfileModal 
+        isOpen={isProfileModalOpen} 
+        onClose={() => setIsProfileModalOpen(false)} 
+      />
     </div>
   );
 }
