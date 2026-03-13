@@ -5,11 +5,24 @@ import DesktopSidebar from "@/components/DesktopSidebar";
 import Image from "next/image";
 import { useState } from "react";
 import ProfileModal from "@/components/ProfileModal";
+import AddBudgetModal from "@/components/AddBudgetModal";
+import EditBudgetModal from "@/components/EditBudgetModal";
+import DeleteBudgetModal from "@/components/DeleteBudgetModal";
 import { useCurrency } from "@/providers/CurrencyProvider";
 
 export default function BudgetsPage() {
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+  const [isAddBudgetModalOpen, setIsAddBudgetModalOpen] = useState(false);
+  const [isEditBudgetModalOpen, setIsEditBudgetModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [categoryToDelete, setCategoryToDelete] = useState("");
+  const [editingBudget, setEditingBudget] = useState<{category: string, maximum: number, theme: string} | null>(null);
+  const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
   const { formatCurrency } = useCurrency();
+
+  const toggleDropdown = (id: string) => {
+    setOpenDropdownId(openDropdownId === id ? null : id);
+  };
   return (
     <div className="flex flex-col lg:flex-row items-start w-full min-h-screen bg-beige-100 relative">
       <DesktopSidebar />
@@ -19,7 +32,10 @@ export default function BudgetsPage() {
           <div className="flex flex-row items-center justify-between w-full max-w-[480px] md:max-w-[688px] lg:max-w-[1060px]">
             <h1 className="text-preset-1 text-grey-900">Budgets</h1>
             <div className="flex flex-row items-center gap-4">
-              <button className="flex flex-row justify-center items-center px-4 h-[53px] bg-grey-900 text-white text-preset-4-bold rounded-lg cursor-pointer hover:bg-grey-500 transition-colors">
+              <button 
+                onClick={() => setIsAddBudgetModalOpen(true)}
+                className="flex flex-row justify-center items-center px-4 h-[53px] bg-grey-900 text-white text-preset-4-bold rounded-lg cursor-pointer hover:bg-grey-500 transition-colors"
+              >
                 + Add New Budget
               </button>
               <button 
@@ -122,9 +138,41 @@ export default function BudgetsPage() {
                   <div className="w-4 h-4 bg-green rounded-full"></div>
                   <h2 className="text-preset-2 text-grey-900">Entertainment</h2>
                 </div>
-                <button className="bg-transparent border-none cursor-pointer p-0 opacity-60 hover:opacity-100 group">
-                  <Image src="/assets/images/icon-ellipsis.svg" alt="Options" width={16} height={16} className="text-grey-300" style={{filter: 'brightness(0) saturate(100%) invert(80%) sepia(2%) saturate(16%) hue-rotate(14deg) brightness(85%) contrast(92%)'}}/>
-                </button>
+                <div className="relative">
+                  <button 
+                    onClick={() => toggleDropdown('entertainment')}
+                    className="bg-transparent border-none cursor-pointer p-0 opacity-60 hover:opacity-100 group"
+                  >
+                    <Image src="/assets/images/icon-ellipsis.svg" alt="Options" width={16} height={16} className="text-grey-300" style={{filter: 'brightness(0) saturate(100%) invert(80%) sepia(2%) saturate(16%) hue-rotate(14deg) brightness(85%) contrast(92%)'}}/>
+                  </button>
+
+                  {/* Dropdown */}
+                  {openDropdownId === 'entertainment' && (
+                    <div className="flex absolute top-8 right-0 flex-col items-start p-[12px_20px] gap-3 w-[134px] bg-white shadow-[0px_4px_24px_rgba(0,0,0,0.25)] rounded-lg z-20">
+                      <button 
+                        onClick={() => {
+                          setEditingBudget({category: 'Entertainment', maximum: 50, theme: 'Green'});
+                          setIsEditBudgetModalOpen(true);
+                          setOpenDropdownId(null);
+                        }}
+                        className="flex flex-row items-center p-0 gap-4 w-full bg-transparent border-none cursor-pointer hover:opacity-70 transition-opacity"
+                      >
+                        <span className="text-preset-4 text-grey-900">Edit Budget</span>
+                      </button>
+                      <div className="w-full h-[1px] bg-[#F2F2F2]"></div>
+                      <button 
+                        onClick={() => {
+                          setCategoryToDelete('Entertainment');
+                          setIsDeleteModalOpen(true);
+                          setOpenDropdownId(null);
+                        }}
+                        className="flex flex-row items-center p-0 gap-4 w-full bg-transparent border-none cursor-pointer hover:opacity-70 transition-opacity"
+                      >
+                        <span className="text-preset-4 text-red">Delete Budget</span>
+                      </button>
+                    </div>
+                  )}
+                </div>
               </div>
 
               <div className="flex flex-col items-start gap-4 w-full">
@@ -220,9 +268,41 @@ export default function BudgetsPage() {
                   <div className="w-4 h-4 bg-cyan rounded-full"></div>
                   <h2 className="text-preset-2 text-grey-900">Bills</h2>
                 </div>
-                <button className="bg-transparent border-none cursor-pointer p-0 opacity-60 hover:opacity-100 group">
-                  <Image src="/assets/images/icon-ellipsis.svg" alt="Options" width={16} height={16} className="text-grey-300" style={{filter: 'brightness(0) saturate(100%) invert(80%) sepia(2%) saturate(16%) hue-rotate(14deg) brightness(85%) contrast(92%)'}}/>
-                </button>
+                <div className="relative">
+                  <button 
+                    onClick={() => toggleDropdown('bills')}
+                    className="bg-transparent border-none cursor-pointer p-0 opacity-60 hover:opacity-100 group"
+                  >
+                    <Image src="/assets/images/icon-ellipsis.svg" alt="Options" width={16} height={16} className="text-grey-300" style={{filter: 'brightness(0) saturate(100%) invert(80%) sepia(2%) saturate(16%) hue-rotate(14deg) brightness(85%) contrast(92%)'}}/>
+                  </button>
+
+                  {/* Dropdown */}
+                  {openDropdownId === 'bills' && (
+                    <div className="flex absolute top-8 right-0 flex-col items-start p-[12px_20px] gap-3 w-[134px] bg-white shadow-[0px_4px_24px_rgba(0,0,0,0.25)] rounded-lg z-20">
+                      <button 
+                        onClick={() => {
+                          setEditingBudget({category: 'Bills', maximum: 750, theme: 'Cyan'});
+                          setIsEditBudgetModalOpen(true);
+                          setOpenDropdownId(null);
+                        }}
+                        className="flex flex-row items-center p-0 gap-4 w-full bg-transparent border-none cursor-pointer hover:opacity-70 transition-opacity"
+                      >
+                        <span className="text-preset-4 text-grey-900">Edit Budget</span>
+                      </button>
+                      <div className="w-full h-[1px] bg-[#F2F2F2]"></div>
+                      <button 
+                        onClick={() => {
+                          setCategoryToDelete('Bills');
+                          setIsDeleteModalOpen(true);
+                          setOpenDropdownId(null);
+                        }}
+                        className="flex flex-row items-center p-0 gap-4 w-full bg-transparent border-none cursor-pointer hover:opacity-70 transition-opacity"
+                      >
+                        <span className="text-preset-4 text-red">Delete Budget</span>
+                      </button>
+                    </div>
+                  )}
+                </div>
               </div>
 
               <div className="flex flex-col items-start gap-4 w-full">
@@ -305,9 +385,41 @@ export default function BudgetsPage() {
                   <div className="w-4 h-4 bg-yellow rounded-full"></div>
                   <h2 className="text-preset-2 text-grey-900">Dining Out</h2>
                 </div>
-                <button className="bg-transparent border-none cursor-pointer p-0 opacity-60 hover:opacity-100 group">
-                   <Image src="/assets/images/icon-ellipsis.svg" alt="Options" width={16} height={16} className="text-grey-300" style={{filter: 'brightness(0) saturate(100%) invert(80%) sepia(2%) saturate(16%) hue-rotate(14deg) brightness(85%) contrast(92%)'}}/>
-                </button>
+                <div className="relative">
+                  <button 
+                    onClick={() => toggleDropdown('dining')}
+                    className="bg-transparent border-none cursor-pointer p-0 opacity-60 hover:opacity-100 group"
+                  >
+                    <Image src="/assets/images/icon-ellipsis.svg" alt="Options" width={16} height={16} className="text-grey-300" style={{filter: 'brightness(0) saturate(100%) invert(80%) sepia(2%) saturate(16%) hue-rotate(14deg) brightness(85%) contrast(92%)'}}/>
+                  </button>
+
+                  {/* Dropdown */}
+                  {openDropdownId === 'dining' && (
+                    <div className="flex absolute top-8 right-0 flex-col items-start p-[12px_20px] gap-3 w-[134px] bg-white shadow-[0px_4px_24px_rgba(0,0,0,0.25)] rounded-lg z-20">
+                      <button 
+                        onClick={() => {
+                          setEditingBudget({category: 'Dining Out', maximum: 75, theme: 'Yellow'});
+                          setIsEditBudgetModalOpen(true);
+                          setOpenDropdownId(null);
+                        }}
+                        className="flex flex-row items-center p-0 gap-4 w-full bg-transparent border-none cursor-pointer hover:opacity-70 transition-opacity"
+                      >
+                        <span className="text-preset-4 text-grey-900">Edit Budget</span>
+                      </button>
+                      <div className="w-full h-[1px] bg-[#F2F2F2]"></div>
+                      <button 
+                        onClick={() => {
+                          setCategoryToDelete('Dining Out');
+                          setIsDeleteModalOpen(true);
+                          setOpenDropdownId(null);
+                        }}
+                        className="flex flex-row items-center p-0 gap-4 w-full bg-transparent border-none cursor-pointer hover:opacity-70 transition-opacity"
+                      >
+                        <span className="text-preset-4 text-red">Delete Budget</span>
+                      </button>
+                    </div>
+                  )}
+                </div>
               </div>
 
               <div className="flex flex-col items-start gap-4 w-full">
@@ -406,9 +518,41 @@ export default function BudgetsPage() {
                   <div className="w-4 h-4 bg-navy rounded-full"></div>
                   <h2 className="text-preset-2 text-grey-900">Personal Care</h2>
                 </div>
-                <button className="bg-transparent border-none cursor-pointer p-0 opacity-60 hover:opacity-100 group">
-                   <Image src="/assets/images/icon-ellipsis.svg" alt="Options" width={16} height={16} className="text-grey-300" style={{filter: 'brightness(0) saturate(100%) invert(80%) sepia(2%) saturate(16%) hue-rotate(14deg) brightness(85%) contrast(92%)'}}/>
-                </button>
+                <div className="relative">
+                  <button 
+                    onClick={() => toggleDropdown('personal')}
+                    className="bg-transparent border-none cursor-pointer p-0 opacity-60 hover:opacity-100 group"
+                  >
+                    <Image src="/assets/images/icon-ellipsis.svg" alt="Options" width={16} height={16} className="text-grey-300" style={{filter: 'brightness(0) saturate(100%) invert(80%) sepia(2%) saturate(16%) hue-rotate(14deg) brightness(85%) contrast(92%)'}}/>
+                  </button>
+
+                  {/* Dropdown */}
+                  {openDropdownId === 'personal' && (
+                    <div className="flex absolute top-8 right-0 flex-col items-start p-[12px_20px] gap-3 w-[134px] bg-white shadow-[0px_4px_24px_rgba(0,0,0,0.25)] rounded-lg z-20">
+                      <button 
+                        onClick={() => {
+                          setEditingBudget({category: 'Personal Care', maximum: 100, theme: 'Navy'});
+                          setIsEditBudgetModalOpen(true);
+                          setOpenDropdownId(null);
+                        }}
+                        className="flex flex-row items-center p-0 gap-4 w-full bg-transparent border-none cursor-pointer hover:opacity-70 transition-opacity"
+                      >
+                        <span className="text-preset-4 text-grey-900">Edit Budget</span>
+                      </button>
+                      <div className="w-full h-[1px] bg-[#F2F2F2]"></div>
+                      <button 
+                        onClick={() => {
+                          setCategoryToDelete('Personal Care');
+                          setIsDeleteModalOpen(true);
+                          setOpenDropdownId(null);
+                        }}
+                        className="flex flex-row items-center p-0 gap-4 w-full bg-transparent border-none cursor-pointer hover:opacity-70 transition-opacity"
+                      >
+                        <span className="text-preset-4 text-red">Delete Budget</span>
+                      </button>
+                    </div>
+                  )}
+                </div>
               </div>
 
               <div className="flex flex-col items-start gap-4 w-full">
@@ -512,6 +656,21 @@ export default function BudgetsPage() {
       <ProfileModal 
         isOpen={isProfileModalOpen} 
         onClose={() => setIsProfileModalOpen(false)} 
+      />
+
+      <AddBudgetModal
+        isOpen={isAddBudgetModalOpen}
+        onClose={() => setIsAddBudgetModalOpen(false)}
+      />
+      <EditBudgetModal 
+        isOpen={isEditBudgetModalOpen} 
+        onClose={() => setIsEditBudgetModalOpen(false)} 
+        budget={editingBudget || undefined} 
+      />
+      <DeleteBudgetModal 
+        isOpen={isDeleteModalOpen} 
+        onClose={() => setIsDeleteModalOpen(false)} 
+        categoryName={categoryToDelete} 
       />
     </div>
   );
