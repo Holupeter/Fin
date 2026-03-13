@@ -8,8 +8,8 @@ export default function BudgetsPage() {
       <DesktopSidebar />
 
       <main className="flex flex-col items-center w-full flex-1 mb-[52px] lg:mb-0 max-w-[1140px] mx-auto">
-        <div className="sticky top-0 z-10 flex flex-row justify-between items-center w-full bg-beige-100 px-4 pt-6 pb-6 md:px-10 md:pt-8 md:pb-8 lg:px-10 lg:pt-8 lg:pb-8">
-          <div className="flex flex-row justify-between items-center w-full max-w-[480px] md:max-w-[688px] lg:max-w-[1060px] mx-auto">
+        <div className="sticky top-0 z-10 flex flex-row items-center justify-center w-full bg-beige-100 px-4 pt-6 pb-6 md:px-10 md:pt-8 md:pb-8 lg:px-10 lg:pt-8 lg:pb-8">
+          <div className="flex flex-row items-center justify-between w-full max-w-[480px] md:max-w-[688px] lg:max-w-[1060px]">
             <h1 className="text-preset-1 text-grey-900">Budgets</h1>
             <button className="flex flex-row justify-center items-center px-4 h-[53px] bg-grey-900 text-white text-preset-4-bold rounded-lg cursor-pointer hover:bg-grey-500 transition-colors">
               + Add New Budget
@@ -17,9 +17,10 @@ export default function BudgetsPage() {
           </div>
         </div>
 
-        <div className="flex flex-col lg:flex-row items-center lg:items-start lg:justify-center px-4 pb-6 md:px-10 md:pb-8 lg:px-10 lg:pb-8 gap-6 w-full lg:max-w-[1060px] mx-auto">
-          {/* Left Side (Chart container) */}
-          <div className="flex flex-col md:flex-row lg:flex-col justify-center items-center md:items-start py-6 px-5 gap-8 md:p-8 w-full max-w-[343px] md:max-w-[688px] lg:max-w-[428px] bg-white rounded-xl">
+        <div className="flex flex-col items-center w-full px-4 pb-6 md:px-10 md:pb-8 lg:px-10 lg:pb-8">
+          <div className="flex flex-col lg:flex-row items-center lg:items-start gap-6 w-full max-w-[480px] md:max-w-[688px] lg:max-w-[1060px]">
+            {/* Left Side (Chart container) */}
+            <div className="flex flex-col md:flex-row lg:flex-col justify-center items-center md:items-start py-6 px-5 gap-8 md:p-8 w-full max-w-[480px] md:max-w-[688px] lg:max-w-[428px] lg:w-[428px] bg-white rounded-xl">
             {/* Chart */}
             <div className="flex flex-row justify-center items-center gap-2 w-full max-w-[303px] md:max-w-[296px] lg:max-w-[364px] md:h-[280px]">
               <div className="relative flex justify-center items-center w-[240px] h-[240px]">
@@ -97,7 +98,7 @@ export default function BudgetsPage() {
           </div>
 
           {/* Right Side (Budget List) */}
-          <div className="flex flex-col items-start gap-6 w-full max-w-[343px] md:max-w-[688px] lg:max-w-[608px]">
+          <div className="flex flex-col items-start gap-6 w-full max-w-[480px] md:max-w-[688px] lg:max-w-[608px] lg:w-[608px]">
             {/* Entertainment Budget */}
             <div className="flex flex-col items-start p-6 gap-5 w-full bg-white rounded-xl md:p-8">
               <div className="flex flex-row justify-between items-center w-full">
@@ -121,7 +122,7 @@ export default function BudgetsPage() {
                 </div>
 
                 {/* Spent & Free */}
-                <div className="flex flex-row items-center w-full">
+                <div className="flex flex-row items-center w-full gap-4">
                   <div className="flex flex-row items-center gap-4 flex-1">
                     <div className="w-1 h-[43px] bg-green rounded-lg"></div>
                     <div className="flex flex-col justify-center gap-1">
@@ -140,7 +141,7 @@ export default function BudgetsPage() {
               </div>
 
               {/* Latest Spending */}
-              <div className="flex flex-col justify-center items-start p-4 md:p-5 gap-5 w-full bg-beige-100 rounded-xl mt-1">
+              <div className="flex flex-col justify-center items-start p-4 md:p-5 gap-5 w-full bg-beige-100 rounded-xl">
                 <div className="flex flex-row justify-between items-center w-full">
                   <span className="text-preset-3 text-grey-900">Latest Spending</span>
                   <button className="flex flex-row items-center gap-3 bg-transparent border-none text-preset-4 text-grey-500 hover:text-grey-900 cursor-pointer group">
@@ -219,7 +220,7 @@ export default function BudgetsPage() {
                 </div>
 
                 {/* Spent & Free */}
-                <div className="flex flex-row items-center w-full">
+                <div className="flex flex-row items-center w-full gap-4">
                   <div className="flex flex-row items-center gap-4 flex-1">
                     <div className="w-1 h-[43px] bg-cyan rounded-lg"></div>
                     <div className="flex flex-col justify-center gap-1">
@@ -238,7 +239,7 @@ export default function BudgetsPage() {
               </div>
 
               {/* Latest Spending */}
-              <div className="flex flex-col justify-center items-start p-4 md:p-5 gap-5 w-full bg-beige-100 rounded-xl mt-1">
+              <div className="flex flex-col justify-center items-start p-4 md:p-5 gap-5 w-full bg-beige-100 rounded-xl">
                 <div className="flex flex-row justify-between items-center w-full">
                   <span className="text-preset-3 text-grey-900">Latest Spending</span>
                   <button className="flex flex-row items-center gap-3 bg-transparent border-none text-preset-4 text-grey-500 hover:text-grey-900 cursor-pointer group">
@@ -304,7 +305,7 @@ export default function BudgetsPage() {
                 </div>
 
                 {/* Spent & Free */}
-                <div className="flex flex-row items-center w-full">
+                <div className="flex flex-row items-center w-full gap-4">
                   <div className="flex flex-row items-center gap-4 flex-1">
                     <div className="w-1 h-[43px] bg-yellow rounded-lg"></div>
                     <div className="flex flex-col justify-center gap-1">
@@ -323,7 +324,7 @@ export default function BudgetsPage() {
               </div>
 
               {/* Latest Spending */}
-              <div className="flex flex-col justify-center items-start p-4 md:p-5 gap-5 w-full bg-beige-100 rounded-xl mt-1">
+              <div className="flex flex-col justify-center items-start p-4 md:p-5 gap-5 w-full bg-beige-100 rounded-xl">
                 <div className="flex flex-row justify-between items-center w-full">
                   <span className="text-preset-3 text-grey-900">Latest Spending</span>
                   <button className="flex flex-row items-center gap-3 bg-transparent border-none text-preset-4 text-grey-500 hover:text-grey-900 cursor-pointer group">
@@ -405,7 +406,7 @@ export default function BudgetsPage() {
                 </div>
 
                 {/* Spent & Free */}
-                <div className="flex flex-row items-center w-full">
+                <div className="flex flex-row items-center w-full gap-4">
                   <div className="flex flex-row items-center gap-4 flex-1">
                     <div className="w-1 h-[43px] bg-navy rounded-lg"></div>
                     <div className="flex flex-col justify-center gap-1">
@@ -424,7 +425,7 @@ export default function BudgetsPage() {
               </div>
 
               {/* Latest Spending */}
-              <div className="flex flex-col justify-center items-start p-4 md:p-5 gap-5 w-full bg-beige-100 rounded-xl mt-1">
+              <div className="flex flex-col justify-center items-start p-4 md:p-5 gap-5 w-full bg-beige-100 rounded-xl">
                 <div className="flex flex-row justify-between items-center w-full">
                   <span className="text-preset-3 text-grey-900">Latest Spending</span>
                   <button className="flex flex-row items-center gap-3 bg-transparent border-none text-preset-4 text-grey-500 hover:text-grey-900 cursor-pointer group">
@@ -483,6 +484,7 @@ export default function BudgetsPage() {
               </div>
             </div>
 
+          </div>
           </div>
         </div>
       </main>

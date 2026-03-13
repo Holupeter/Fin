@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Public_Sans } from 'next/font/google';
 import './globals.css';
+import { CurrencyProvider } from '@/providers/CurrencyProvider';
 
 const publicSans = Public_Sans({
   subsets: ['latin'],
@@ -24,7 +25,9 @@ export default function RootLayout({
       <body
         className={`${publicSans.className} antialiased bg-beige-100 text-grey-900`}
       >
-        {children}
+        <CurrencyProvider>
+          {children}
+        </CurrencyProvider>
       </body>
     </html>
   );

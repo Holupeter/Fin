@@ -1,9 +1,14 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
+import { useState } from "react";
 import MobileSidebar from "@/components/MobileSidebar";
 import DesktopSidebar from "@/components/DesktopSidebar";
+import ProfileModal from "@/components/ProfileModal";
 
 export default function Home() {
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   return (
     <div className="flex flex-col lg:flex-row items-start w-full min-h-screen bg-beige-100 relative">
       {/* Desktop Sidebar (hidden on mobile, visible on lg) - added for structure consistency */}
@@ -14,8 +19,17 @@ export default function Home() {
 
         {/* Main Content Title */}
         <div className="sticky top-0 z-10 flex flex-row items-start justify-center w-full bg-beige-100 px-4 pt-6 pb-6 md:px-10 md:pt-8 md:pb-8 lg:px-10 lg:pt-8 lg:pb-8">
-          <div className="w-full max-w-[480px] md:max-w-[688px] lg:max-w-[1060px]">
+          <div className="w-full flex-row items-center justify-between flex max-w-[480px] md:max-w-[688px] lg:max-w-[1060px]">
              <h1 className="text-preset-1 text-grey-900">Overview</h1>
+             
+             {/* Profile Avatar Trigger */}
+             <button 
+               onClick={() => setIsProfileModalOpen(true)}
+               className="w-10 h-10 rounded-full bg-white overflow-hidden border border-grey-500 relative cursor-pointer opacity-90 hover:opacity-100 transition-opacity p-0"
+               aria-label="Open Profile"
+             >
+               <Image src="/assets/images/avatars/emma-richardson.jpg" alt="Profile" fill sizes="40px" className="object-cover" />
+             </button>
           </div>
         </div>
 
@@ -282,9 +296,15 @@ export default function Home() {
       </main>
 
       {/* Mobile Bottom Nav */}
-      <div className="lg:hidden w-full fixed bottom-0 left-0 bg-transparent">
+      <div className="lg:hidden w-full fixed bottom-0 left-0 bg-transparent z-50">
         <MobileSidebar />
       </div>
+
+      {/* Profile Modal */}
+      <ProfileModal 
+        isOpen={isProfileModalOpen} 
+        onClose={() => setIsProfileModalOpen(false)} 
+      />
     </div>
   );
 }

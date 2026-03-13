@@ -47,10 +47,9 @@ export default function MobileSidebar() {
               href={item.href}
               className={`
                 flex flex-col items-center justify-center pt-2 pb-3 gap-1 md:gap-1 flex-1 md:w-[104px] md:h-[66px] md:flex-none rounded-t-lg
-                ${
-                  isActive
-                    ? "bg-beige-100 border-b-4 border-green text-grey-900"
-                    : "text-grey-300"
+                ${isActive
+                  ? "bg-beige-100 border-b-4 border-green text-grey-900"
+                  : "text-grey-300"
                 }
               `}
             >
@@ -64,18 +63,17 @@ export default function MobileSidebar() {
                   style={
                     isActive
                       ? {
-                          filter:
-                            "invert(38%) sepia(25%) saturate(1000%) hue-rotate(130deg) brightness(85%) contrast(85%)",
-                        }
+                        filter:
+                          "invert(38%) sepia(25%) saturate(1000%) hue-rotate(130deg) brightness(85%) contrast(85%)",
+                      }
                       : { filter: "invert(70%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(95%) contrast(90%)" } // Approx #B3B3B3
                   }
                 />
               </div>
               {/* Label - hidden on mobile, visible on tablet+ */}
               <span
-                className={`hidden md:block text-preset-5-bold ${
-                  isActive ? "text-grey-900" : "text-grey-300"
-                }`}
+                className={`hidden md:block text-preset-5-bold ${isActive ? "text-grey-900" : "text-grey-300"
+                  }`}
               >
                 {item.label}
               </span>
