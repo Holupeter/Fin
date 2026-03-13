@@ -5,18 +5,21 @@ import DesktopSidebar from "@/components/DesktopSidebar";
 
 export default function Home() {
   return (
-    <div className="flex flex-col lg:flex-row items-start w-full min-h-screen bg-beige-100 relative max-w-[1440px] mx-auto">
+    <div className="flex flex-col lg:flex-row items-start w-full min-h-screen bg-beige-100 relative">
       {/* Desktop Sidebar (hidden on mobile, visible on lg) - added for structure consistency */}
       <DesktopSidebar />
 
       {/* Main Content Area */}
-      <main className="flex flex-col items-center px-4 py-6 md:px-10 md:py-8 lg:px-10 lg:py-8 gap-8 w-full flex-1 mb-20 lg:mb-0 max-w-[1140px]">
-        
+      <main className="flex flex-col items-center w-full flex-1 mb-20 lg:mb-0 max-w-[1140px] mx-auto">
+
         {/* Main Content Title */}
-        <div className="flex flex-row items-start w-full max-w-[480px] md:max-w-[688px] lg:max-w-[1060px]">
-          <h1 className="text-preset-1 text-grey-900">Overview</h1>
+        <div className="sticky top-0 z-10 flex flex-row items-start justify-center w-full bg-beige-100 px-4 pt-6 pb-6 md:px-10 md:pt-8 md:pb-8 lg:px-10 lg:pt-8 lg:pb-8">
+          <div className="w-full max-w-[480px] md:max-w-[688px] lg:max-w-[1060px]">
+             <h1 className="text-preset-1 text-grey-900">Overview</h1>
+          </div>
         </div>
 
+        <div className="flex flex-col items-center px-4 pb-6 md:px-10 md:pb-8 lg:px-10 lg:pb-8 gap-8 w-full">
         {/* Summary (Balances) */}
         <div className="flex flex-col md:flex-row items-center gap-3 md:gap-6 w-full max-w-[480px] md:max-w-[688px] lg:max-w-[1060px]">
           {/* Current Balance */}
@@ -40,10 +43,10 @@ export default function Home() {
 
         {/* Dashoard Content Split (Left & Right Sides) */}
         <div className="flex flex-col lg:flex-row items-start gap-6 w-full max-w-[480px] md:max-w-[688px] lg:max-w-[1060px]">
-          
+
           {/* Left Side */}
           <div className="flex flex-col items-start gap-4 md:gap-6 w-full flex-1 lg:max-w-[608px]">
-            
+
             {/* Saving Pot */}
             <div className="flex flex-col items-start p-5 md:p-8 gap-5 w-full bg-white rounded-xl">
               <div className="flex flex-row justify-between items-center w-full">
@@ -52,7 +55,7 @@ export default function Home() {
                   See Details
                   <span className="flex items-center justify-center w-3 h-3 text-grey-500 group-hover:text-grey-900">
                     <svg width="6" height="11" viewBox="0 0 6 11" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M1 1L5 5.5L1 10" stroke="currentColor" strokeWidth="2"/>
+                      <path d="M1 1L5 5.5L1 10" stroke="currentColor" strokeWidth="2" />
                     </svg>
                   </span>
                 </button>
@@ -62,7 +65,7 @@ export default function Home() {
                 {/* Total Saved Card */}
                 <div className="flex flex-row items-center p-4 md:p-5 gap-4 w-full md:w-[247px] bg-beige-100 rounded-xl md:shrink-0">
                   <div className="w-10 h-10 flex items-center justify-center">
-                     <Image src="/assets/images/icon-pot.svg" alt="Pot" width={40} height={40} />
+                    <Image src="/assets/images/icon-pot.svg" alt="Pot" width={40} height={40} />
                   </div>
                   <div className="flex flex-col items-start gap-1 md:gap-[11px]">
                     <span className="text-preset-4 text-grey-500">Total Saved</span>
@@ -121,7 +124,7 @@ export default function Home() {
                   View All
                   <span className="flex items-center justify-center w-3 h-3 text-grey-500 group-hover:text-grey-900">
                     <svg width="6" height="11" viewBox="0 0 6 11" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M1 1L5 5.5L1 10" stroke="currentColor" strokeWidth="2"/>
+                      <path d="M1 1L5 5.5L1 10" stroke="currentColor" strokeWidth="2" />
                     </svg>
                   </span>
                 </button>
@@ -140,13 +143,13 @@ export default function Home() {
                     <div className="flex flex-row justify-between items-center py-3 w-full">
                       <div className="flex flex-row items-center gap-4">
                         <div className="w-8 h-8 rounded-full bg-beige-100 overflow-hidden relative">
-                           <Image 
-                             src={txn.img} 
-                             alt={txn.name} 
-                             fill 
-                             sizes="32px"
-                             className="object-cover"
-                           />
+                          <Image
+                            src={txn.img}
+                            alt={txn.name}
+                            fill
+                            sizes="32px"
+                            className="object-cover"
+                          />
                         </div>
                         <span className="text-preset-4-bold text-grey-900">{txn.name}</span>
                       </div>
@@ -160,12 +163,12 @@ export default function Home() {
                 ))}
               </div>
             </div>
-            
+
           </div>
 
           {/* Right Side */}
           <div className="flex flex-col items-start gap-4 md:gap-6 w-full flex-1 lg:max-w-[428px]">
-            
+
             {/* My Budgets */}
             <div className="flex flex-col items-start p-5 md:p-8 gap-5 w-full bg-white rounded-xl">
               <div className="flex flex-row justify-between items-center w-full">
@@ -174,7 +177,7 @@ export default function Home() {
                   See Details
                   <span className="flex items-center justify-center w-3 h-3 text-grey-500 group-hover:text-grey-900">
                     <svg width="6" height="11" viewBox="0 0 6 11" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M1 1L5 5.5L1 10" stroke="currentColor" strokeWidth="2"/>
+                      <path d="M1 1L5 5.5L1 10" stroke="currentColor" strokeWidth="2" />
                     </svg>
                   </span>
                 </button>
@@ -183,7 +186,7 @@ export default function Home() {
               <div className="flex flex-col md:flex-row items-center justify-center gap-4 md:gap-8 w-full py-2">
                 {/* Pie Chart Representation */}
                 <div className="relative flex justify-center items-center w-[240px] h-[240px]">
-                  <div 
+                  <div
                     className="absolute w-[240px] h-[240px] rounded-full"
                     style={{
                       background: "conic-gradient(#277C78 0% 6.1%, #82C9D7 6.1% 67.5%, #F2CDAC 67.5% 84%, #626070 84% 100%)"
@@ -247,7 +250,7 @@ export default function Home() {
                   See Details
                   <span className="flex items-center justify-center w-3 h-3 text-grey-500 group-hover:text-grey-900">
                     <svg width="6" height="11" viewBox="0 0 6 11" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M1 1L5 5.5L1 10" stroke="currentColor" strokeWidth="2"/>
+                      <path d="M1 1L5 5.5L1 10" stroke="currentColor" strokeWidth="2" />
                     </svg>
                   </span>
                 </button>
@@ -273,6 +276,7 @@ export default function Home() {
             </div>
 
           </div>
+        </div>
         </div>
 
       </main>

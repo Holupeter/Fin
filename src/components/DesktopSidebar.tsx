@@ -39,7 +39,7 @@ export default function DesktopSidebar() {
 
   return (
     <aside
-      className={`hidden lg:flex flex-col items-start pb-6 gap-6 min-h-screen bg-grey-900 rounded-r-2xl transition-all duration-300 flex-shrink-0 ${
+      className={`hidden lg:flex flex-col items-start pb-6 gap-6 sticky top-0 h-screen overflow-y-auto bg-grey-900 rounded-r-2xl transition-all duration-300 flex-shrink-0 z-20 ${
         isMinimized ? "w-[88px]" : "w-[300px]"
       }`}
     >

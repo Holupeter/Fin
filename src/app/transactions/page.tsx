@@ -19,20 +19,23 @@ export default function TransactionsPage() {
   ];
 
   return (
-    <div className="flex flex-col lg:flex-row items-start w-full min-h-screen bg-beige-100 max-w-[1440px] mx-auto relative">
+    <div className="flex flex-col lg:flex-row items-start w-full min-h-screen bg-beige-100 relative">
       <DesktopSidebar />
 
-      <main className="flex flex-col items-center px-4 py-6 md:px-10 md:py-8 lg:px-10 lg:py-8 gap-8 w-full flex-1 mb-[52px] lg:mb-0 max-w-[1140px]">
-        <div className="flex flex-row items-center py-2 w-full max-w-[480px] md:max-w-[688px] lg:max-w-[1060px]">
-          <h1 className="text-preset-1 text-grey-900">Transactions</h1>
+      <main className="flex flex-col items-center w-full flex-1 mb-[52px] lg:mb-0 max-w-[1140px] mx-auto">
+        <div className="sticky top-0 z-10 flex flex-row items-start justify-center w-full bg-beige-100 px-4 pt-6 pb-6 md:px-10 md:pt-8 md:pb-8 lg:px-10 lg:pt-8 lg:pb-8">
+          <div className="w-full flex-row items-center max-w-[480px] md:max-w-[688px] lg:max-w-[1060px]">
+            <h1 className="text-preset-1 text-grey-900">Transactions</h1>
+          </div>
         </div>
 
-        <div className="flex flex-col items-center px-5 py-6 gap-6 w-full  max-w-[343px] md:max-w-[688px] lg:max-w-[1060px] bg-white rounded-xl">
+        <div className="flex flex-col items-center px-4 pb-6 md:px-10 md:pb-8 lg:px-10 lg:pb-8 gap-8 w-full">
+        <div className="flex flex-col items-center px-5 py-6 gap-6 w-full max-w-[343px] md:max-w-[688px] lg:max-w-[1060px] bg-white rounded-xl">
           <div className="flex flex-row justify-between items-center w-full gap-6">
             <div className="flex flex-row items-center px-5 py-3 gap-4 w-[215px] h-[45px] bg-white border border-grey-500 rounded-lg group focus-within:border-grey-900">
-              <input 
-                type="text" 
-                placeholder="Search transaction" 
+              <input
+                type="text"
+                placeholder="Search transaction"
                 className="w-full text-preset-4 text-grey-900 placeholder:text-grey-500 outline-none bg-transparent"
               />
               <Image src="/assets/images/icon-search.svg" alt="Search" width={16} height={16} className="opacity-60 group-focus-within:opacity-100" />
@@ -76,7 +79,7 @@ export default function TransactionsPage() {
             <button className="flex justify-center items-center w-[48px] h-10 border border-grey-500 rounded-lg bg-white cursor-pointer hover:bg-beige-100 transition-colors">
               <Image src="/assets/images/icon-caret-left.svg" alt="Previous" width={16} height={16} className="rotate-0" />
             </button>
-            
+
             <div className="flex flex-row items-center gap-2">
               <button className="flex justify-center items-center w-10 h-10 bg-grey-900 text-white text-preset-4 rounded-lg cursor-pointer">1</button>
               <button className="flex justify-center items-center w-10 h-10 bg-white border border-grey-500 text-grey-900 text-preset-4 rounded-lg cursor-pointer hover:bg-beige-100 transition-colors">2</button>
@@ -87,6 +90,7 @@ export default function TransactionsPage() {
               <Image src="/assets/images/icon-caret-right.svg" alt="Next" width={16} height={16} className="rotate-0" />
             </button>
           </div>
+        </div>
         </div>
       </main>
 

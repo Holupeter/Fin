@@ -1,6 +1,6 @@
 @import 'tailwindcss';
 
-@theme inline {
+@theme {
   /* --- Colors: Beige --- */
   --color-beige-500: #98908B;
   --color-beige-100: #F8F4F0;
