@@ -1,36 +1,92 @@
-"use client";
-
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import { useCurrency } from "@/providers/CurrencyProvider";
+import { useMutation, useQuery } from "convex/react";
+import { api } from "../../convex/_generated/api";
 
 interface EditBudgetModalProps {
   isOpen: boolean;
   onClose: () => void;
   budget?: {
+    _id: string;
     category: string;
-    maximum: number;
+    budgetAmount: number;
     theme: string;
   };
 }
 
 export default function EditBudgetModal({ isOpen, onClose, budget }: EditBudgetModalProps) {
-  const { currency } = useCurrency();
+  const { currency, toDisplayValue, toInternalValue, formatCurrency } = useCurrency();
   const [budgetCategory, setBudgetCategory] = useState(budget?.category || "Entertainment");
-  const [maxSpending, setMaxSpending] = useState(budget?.maximum?.toString() || "");
+  const [maxSpending, setMaxSpending] = useState(budget?.budgetAmount?.toString() || "");
   const [themeColor, setThemeColor] = useState(budget?.theme || "Green");
+  const [isLoading, setIsLoading] = useState(false);
+
+  const updateBudget = useMutation(api.budgets.updateBudget);
+  const dummyUserId = "j97bt09f8v13wdg5vntas879js16tshd";
+
+  const transactions = useQuery(api.transactions.getTransactions, { userId: dummyUserId });
+  const allBudgets = useQuery(api.budgets.getBudgets, { userId: dummyUserId });
 
   const [isCategoryOpen, setIsCategoryOpen] = useState(false);
   const [isThemeOpen, setIsThemeOpen] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+
+  const totalIncome = transactions
+    ? transactions
+        .filter((t: any) => t.type === "income")
+        .reduce((sum: number, t: any) => sum + t.amount, 0)
+    : 0;
+
+  const totalExpenses = transactions
+    ? transactions
+        .filter((t: any) => t.type === "expense")
+        .reduce((sum: number, t: any) => sum + t.amount, 0)
+    : 0;
+
+  const totalBudgeted = allBudgets
+    ? allBudgets.reduce((sum: number, b: any) => sum + b.budgetAmount, 0)
+    : 0;
+
+  // For editing, we calculate available cash by "giving back" the current budget's amount to the pool
+  const currentBudgetAmount = budget?.budgetAmount || 0;
+  const availableCash = (totalIncome - totalExpenses - totalBudgeted) + currentBudgetAmount;
 
   // Update state when budget prop changes
   useEffect(() => {
     if (budget) {
       setBudgetCategory(budget.category);
-      setMaxSpending(budget.maximum.toString());
+      setMaxSpending(toDisplayValue(budget.budgetAmount).toString());
       setThemeColor(budget.theme);
     }
-  }, [budget]);
+  }, [budget, toDisplayValue]);
+
+  const handleSubmit = async () => {
+    if (!budget || !maxSpending || isNaN(parseFloat(maxSpending))) return;
+
+    const budgetVal = toInternalValue(parseFloat(maxSpending));
+
+    if (budgetVal > availableCash) {
+      setErrorMessage("Budget exceeds your Current Balance. Reduce the budget or add more cash to your account.");
+      setIsLoading(false);
+      return;
+    }
+
+    setErrorMessage("");
+    try {
+      await updateBudget({
+        id: budget._id as any,
+        category: budgetCategory,
+        budgetAmount: budgetVal,
+        theme: themeColor,
+      });
+      onClose();
+    } catch (error) {
+      console.error("Failed to update budget:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
     if (isOpen) {
@@ -77,7 +133,7 @@ export default function EditBudgetModal({ isOpen, onClose, budget }: EditBudgetM
 
   return (
     <div className="fixed inset-0 z-50 flex justify-center items-center bg-grey-900/40 backdrop-blur-sm px-4">
-      <div className={`flex flex-col items-start px-5 py-6 md:p-8 gap-5 w-full max-w-[335px] md:max-w-[560px] h-auto max-h-[90vh] md:h-[469px] bg-white rounded-xl relative shadow-xl ${(isCategoryOpen || isThemeOpen) ? 'overflow-visible' : 'overflow-y-auto overflow-x-hidden'} transition-all duration-300 no-scrollbar`}>
+      <div className={`flex flex-col items-start px-5 py-6 md:p-8 gap-5 w-full max-w-[335px] md:max-w-[560px] h-auto max-h-[90vh] md:h-[540px] bg-white rounded-xl relative shadow-xl overflow-visible transition-all duration-300 no-scrollbar`}>
         {/* Header */}
         <div className="flex flex-row justify-between items-center w-full">
           <h2 className="text-preset-2 md:text-preset-1 text-grey-900">Edit Budget</h2>
@@ -126,7 +182,7 @@ export default function EditBudgetModal({ isOpen, onClose, budget }: EditBudgetM
 
             {/* Category Dropdown */}
             {isCategoryOpen && (
-              <div className="absolute top-[75px] left-0 w-full bg-white shadow-[0px_4px_24px_rgba(0,0,0,0.25)] rounded-lg z-[60] py-3 px-5 flex flex-col gap-3 max-h-[300px] overflow-y-auto no-scrollbar">
+              <div className="absolute top-[75px] left-0 w-full bg-white shadow-[0px_4px_24px_rgba(0,0,0,0.25)] rounded-lg z-[60] py-3 px-5 flex flex-col gap-3 max-h-[160px] overflow-y-auto no-scrollbar">
                 {categories.map((category, index) => (
                   <React.Fragment key={category}>
                     <button
@@ -156,13 +212,22 @@ export default function EditBudgetModal({ isOpen, onClose, budget }: EditBudgetM
             <div className="flex flex-row items-center px-5 py-3 gap-3 w-full h-[45px] bg-white border border-[#98908B] rounded-lg focus-within:border-grey-900 transition-colors shadow-sm">
               <span className="text-preset-4 text-[#98908B]">{currency === "NGN" ? "₦" : "$"}</span>
               <input
-                type="number"
+                type="text"
                 placeholder="e.g. 2000"
                 value={maxSpending}
-                onChange={(e) => setMaxSpending(e.target.value)}
-                className="w-full h-full border-none outline-none text-preset-4 text-grey-900 placeholder:text-[#98908B] bg-transparent"
+                onChange={(e) => {
+                  setMaxSpending(e.target.value);
+                  setErrorMessage("");
+                }}
+                className="w-full h-full border-none outline-none text-preset-4 text-grey-900 placeholder:text-beige-500/50 bg-transparent"
               />
             </div>
+            {errorMessage && (
+              <p className="text-preset-5 text-red mt-1">{errorMessage}</p>
+            )}
+            <p className="text-preset-5 text-grey-500 mt-1 italic">
+              Current Balance: <span className="font-bold text-grey-900">{formatCurrency(availableCash)}</span>
+            </p>
           </div>
 
           {/* Theme Color Input */}
@@ -190,7 +255,7 @@ export default function EditBudgetModal({ isOpen, onClose, budget }: EditBudgetM
 
             {/* Theme Dropdown */}
             {isThemeOpen && (
-              <div className="absolute top-[75px] left-0 w-full bg-white shadow-[0px_4px_24px_rgba(0,0,0,0.25)] rounded-lg z-[60] py-3 px-5 flex flex-col gap-3 max-h-[200px] overflow-y-auto no-scrollbar">
+              <div className="absolute top-[75px] left-0 w-full bg-white shadow-[0px_4px_24px_rgba(0,0,0,0.25)] rounded-lg z-[60] py-3 px-5 flex flex-col gap-3 max-h-[160px] overflow-y-auto no-scrollbar">
                 {themes.map((theme, index) => (
                   <React.Fragment key={theme.name}>
                     <button
@@ -221,10 +286,13 @@ export default function EditBudgetModal({ isOpen, onClose, budget }: EditBudgetM
 
         {/* Save Budget Button */}
         <button
-          className="flex flex-row justify-center items-center p-4 w-full h-[53px] bg-grey-900 rounded-lg mt-4 md:mt-auto hover:bg-grey-500 transition-colors shadow-sm"
-          onClick={onClose}
+          className="flex flex-row justify-center items-center p-4 w-full h-[53px] bg-grey-900 rounded-lg mt-4 md:mt-auto hover:bg-grey-500 transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+          onClick={handleSubmit}
+          disabled={isLoading || !maxSpending}
         >
-          <span className="text-preset-4-bold text-white">Save Changes</span>
+          <span className="text-preset-4-bold text-white">
+            {isLoading ? "Saving..." : "Save Changes"}
+          </span>
         </button>
       </div>
     </div>

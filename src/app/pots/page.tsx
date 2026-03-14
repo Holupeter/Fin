@@ -11,6 +11,8 @@ import DeletePotModal from "@/components/DeletePotModal";
 import AdjustPotBalanceModal from "@/components/AdjustPotBalanceModal";
 import { SmartAmount } from "@/components/SmartAmount";
 import { useCurrency } from "@/providers/CurrencyProvider";
+import { useQuery } from "convex/react";
+import { api } from "../../../convex/_generated/api";
 
 export default function PotsPage() {
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
@@ -20,8 +22,8 @@ export default function PotsPage() {
   const [isAdjustModalOpen, setIsAdjustModalOpen] = useState(false);
   const [adjustMode, setAdjustMode] = useState<"add" | "withdraw">("add");
   const [selectedPotForAdjust, setSelectedPotForAdjust] = useState<any>(null);
-  const [potToDelete, setPotToDelete] = useState("");
-  const [editingPot, setEditingPot] = useState<{name: string, target: number, theme: string} | null>(null);
+  const [potToDelete, setPotToDelete] = useState<any>(null);
+  const [editingPot, setEditingPot] = useState<any>(null);
   const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
   const { formatCurrency } = useCurrency();
 
@@ -29,48 +31,57 @@ export default function PotsPage() {
     setOpenDropdownId(openDropdownId === id ? null : id);
   };
 
-  const pots = [
-    {
-      name: "Savings",
-      color: "bg-green",
-      theme: "Green",
-      saved: 159.00,
-      target: 2000,
-      percentage: "7.95%",
-    },
-    {
-      name: "Concert Ticket",
-      color: "bg-navy",
-      theme: "Navy",
-      saved: 110.00,
-      target: 150,
-      percentage: "73.3%",
-    },
-    {
-      name: "Christmas Gift",
-      color: "bg-cyan",
-      theme: "Cyan",
-      saved: 40.00,
-      target: 60,
-      percentage: "66.6%",
-    },
-    {
-      name: "Holiday to Japan",
-      color: "bg-purple-1",
-      theme: "Purple",
-      saved: 531.00,
-      target: 1440,
-      percentage: "36.8%",
-    },
-    {
-      name: "New Laptop",
-      color: "bg-yellow",
-      theme: "Yellow",
-      saved: 10.00,
-      target: 1000,
-      percentage: "1.0%",
-    },
-  ];
+  const dummyUserId = "j97bt09f8v13wdg5vntas879js16tshd";
+  const livePots = useQuery(api.pots.getPots, { userId: dummyUserId });
+
+  if (!livePots) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-beige-100">
+        <p className="text-preset-4 text-grey-500 animate-pulse">Loading Pots...</p>
+      </div>
+    );
+  }
+
+  const getThemeColorClass = (theme?: string, index: number = 0) => {
+    const themeMap: Record<string, string> = {
+      "Green": "bg-green",
+      "Yellow": "bg-yellow",
+      "Cyan": "bg-cyan",
+      "Navy": "bg-navy",
+      "Red": "bg-red",
+      "Purple": "bg-purple-1", // Purple-1
+      "Turquoise": "bg-turquoise",
+      "Brown": "bg-brown",
+      "Magenta": "bg-magenta",
+      "Blue": "bg-blue",
+      "Navy Grey": "bg-navy-grey",
+      "Army Green": "bg-army-green",
+      "Orange": "bg-orange",
+      "Peach": "bg-peach",
+      "Purple 2": "bg-purple-2"
+    };
+    if (theme && themeMap[theme]) return themeMap[theme];
+    const colors = ["bg-green", "bg-cyan", "bg-navy", "bg-purple-1", "bg-yellow", "bg-orange"];
+    return colors[index % colors.length];
+  };
+
+  const getThemeName = (theme?: string, index: number = 0) => {
+    if (theme) return theme;
+    const names = ["Green", "Cyan", "Navy", "Purple", "Yellow", "Orange"];
+    return names[index % names.length];
+  };
+
+  const pots = livePots.map((pot: any, index: number) => {
+    const percentageNum = (pot.currentAmount / pot.targetAmount) * 100;
+    return {
+      ...pot,
+      color: getThemeColorClass(pot.theme, index),
+      theme: getThemeName(pot.theme, index),
+      saved: pot.currentAmount,
+      target: pot.targetAmount,
+      percentage: `${percentageNum.toFixed(2)}%`,
+    };
+  });
 
   return (
     <div className="flex flex-col lg:flex-row items-start w-full min-h-screen bg-beige-100 relative">
@@ -113,7 +124,7 @@ export default function PotsPage() {
                 {/* Ellipsis icon */}
                 <div className="relative">
                   <button 
-                    onClick={() => toggleDropdown(pot.name)}
+                    onClick={() => toggleDropdown(pot._id)}
                     className="bg-transparent border-none cursor-pointer p-0 opacity-60 hover:opacity-100 group"
                   >
                     <Image 
@@ -127,11 +138,11 @@ export default function PotsPage() {
                   </button>
 
                   {/* Dropdown - Edit Delete Pot */}
-                  {openDropdownId === pot.name && (
+                  {openDropdownId === pot._id && (
                     <div className="flex absolute top-8 right-0 flex-col items-start p-[12px_20px] gap-3 w-[114px] bg-white shadow-[0px_4px_24px_rgba(0,0,0,0.25)] rounded-lg z-20">
                       <button 
                          onClick={() => {
-                          setEditingPot({ name: pot.name, target: pot.target, theme: pot.theme });
+                          setEditingPot(pot);
                           setIsEditPotModalOpen(true);
                           setOpenDropdownId(null);
                         }}
@@ -142,7 +153,7 @@ export default function PotsPage() {
                       <div className="w-full h-[1px] bg-[#F2F2F2]"></div>
                       <button 
                         onClick={() => {
-                          setPotToDelete(pot.name);
+                          setPotToDelete(pot);
                           setIsDeleteModalOpen(true);
                           setOpenDropdownId(null);
                         }}
@@ -158,9 +169,9 @@ export default function PotsPage() {
               {/* Pot Bar and Details */}
               <div className="flex flex-col justify-center items-start gap-4 w-full">
                 
-                <div className="flex flex-row flex-wrap justify-between items-center w-full gap-2 overflow-hidden">
+                <div className="flex flex-row justify-between items-center w-full gap-2 overflow-hidden">
                   <span className="text-preset-4 text-grey-500">Total Saved</span>
-                  <SmartAmount amount={formatCurrency(pot.saved)} className="text-preset-1 text-grey-900 text-right" maxWidth={300} />
+                  <SmartAmount amount={formatCurrency(pot.saved)} className="text-preset-1 text-grey-900 text-right" maxWidth={500} />
                 </div>
 
                 {/* Tracking Bar */}
@@ -171,12 +182,14 @@ export default function PotsPage() {
                       style={{ width: pot.percentage }}
                     />
                   </div>
-                  <div className="flex flex-row justify-between w-full overflow-hidden">
+                  <div className="flex flex-row justify-between items-center w-full gap-2 overflow-hidden">
                     <span className="text-preset-5-bold text-grey-500">{pot.percentage}</span>
-                    <div className="flex flex-row gap-1 items-center shrink-0">
-                      <span className="text-preset-5 text-grey-500">Target of</span>
-                      <SmartAmount amount={formatCurrency(pot.target)} className="text-preset-5 text-grey-500" maxWidth={60} />
-                    </div>
+                    <SmartAmount 
+                      prefix="Target of "
+                      amount={formatCurrency(pot.target)} 
+                      className="text-preset-5 text-grey-500" 
+                      maxWidth={200} 
+                    />
                   </div>
                 </div>
 
@@ -232,7 +245,7 @@ export default function PotsPage() {
       <DeletePotModal 
         isOpen={isDeleteModalOpen} 
         onClose={() => setIsDeleteModalOpen(false)} 
-        potName={potToDelete}
+        pot={potToDelete}
       />
       <AdjustPotBalanceModal
         isOpen={isAdjustModalOpen}

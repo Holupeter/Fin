@@ -1,5 +1,6 @@
 "use client";
 
+import React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
@@ -8,10 +9,116 @@ import DesktopSidebar from "@/components/DesktopSidebar";
 import ProfileModal from "@/components/ProfileModal";
 import { SmartAmount } from "@/components/SmartAmount";
 import { useCurrency } from "@/providers/CurrencyProvider";
+import { TransactionTable } from "@/components/TransactionTable";
+import { useQuery } from "convex/react";
+import { api } from "../../convex/_generated/api";
 
 export default function Home() {
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const { formatCurrency } = useCurrency();
+
+  const dummyUserId = "j97bt09f8v13wdg5vntas879js16tshd";
+
+  const transactions = useQuery(api.transactions.getTransactions, { userId: dummyUserId });
+  const budgets = useQuery(api.budgets.getBudgets, { userId: dummyUserId });
+  const pots = useQuery(api.pots.getPots, { userId: dummyUserId });
+  const bills = useQuery(api.bills.getBills, { userId: dummyUserId });
+
+  if (!transactions || !budgets || !pots || !bills) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-beige-100">
+        <p className="text-preset-4 text-grey-500 animate-pulse">Loading Dashboard...</p>
+      </div>
+    );
+  }
+
+  // Helpers
+  const getThemeColor = (theme?: string, index: number = 0) => {
+    const themeMap: Record<string, string> = {
+      "Green": "#277C78",
+      "Yellow": "#F2CDAC",
+      "Cyan": "#82C9D7",
+      "Navy": "#626070",
+      "Red": "#C94736",
+      "Purple": "#826CB0",
+      "Turquoise": "#597C7C",
+      "Brown": "#93674F",
+      "Magenta": "#934F6F",
+      "Blue": "#3F82B2",
+      "Navy Grey": "#97A0AC",
+      "Army Green": "#7F9161",
+      "Orange": "#BE6C49",
+      "Peach": "#CAB361",
+      "Purple 2": "#7F61DC"
+    };
+    if (theme && themeMap[theme]) return themeMap[theme];
+    const colors = ["#277C78", "#82C9D7", "#F2CDAC", "#626070", "#AF81BA", "#BE6C49"];
+    return colors[index % colors.length];
+  };
+
+  // Summary Calcs
+  const statsIncome = transactions
+    .filter((t: any) => t.type === "income" && t.category !== "Savings")
+    .reduce((sum: number, t: any) => sum + t.amount, 0);
+
+  const statsExpenses = transactions
+    .filter((t: any) => t.type === "expense" && t.category !== "Savings")
+    .reduce((sum: number, t: any) => sum + t.amount, 0);
+
+  const totalIncome = transactions
+    .filter((t: any) => t.type === "income")
+    .reduce((sum: number, t: any) => sum + t.amount, 0);
+
+  const totalExpenses = transactions
+    .filter((t: any) => t.type === "expense")
+    .reduce((sum: number, t: any) => sum + t.amount, 0);
+
+  const totalBudgetLimit = budgets.reduce((sum: number, b: any) => sum + b.budgetAmount, 0);
+  const currentBalance = (totalIncome - totalExpenses) - totalBudgetLimit;
+
+  // Pots Calcs
+  const totalSaved = pots.reduce((sum: number, p: any) => sum + p.currentAmount, 0);
+  const potsDisplay = [...pots].sort((a: any, b: any) => b.createdAt - a.createdAt).slice(0, 3);
+
+  // Budgets Calcs
+  const budgetStats = budgets.map((b: any, i: number) => {
+    const spent = transactions
+      .filter((t: any) => t.category === b.category && t.type === "expense")
+      .reduce((sum: number, t: any) => sum + t.amount, 0);
+    return {
+      ...b,
+      spent,
+      color: getThemeColor(b.theme, i)
+    };
+  });
+
+  const totalBudgetSpent = budgetStats.reduce((sum: number, b: any) => sum + b.spent, 0);
+
+  // Recurring Bills Calcs
+  const totalBillsAmount = bills.reduce((sum: number, b: any) => sum + b.amount, 0);
+  const remainingBillsAmount = bills
+    .filter((b: any) => b.status === "upcoming" || b.status === "due-soon")
+    .reduce((sum: number, b: any) => sum + b.amount, 0);
+  const dueSoonBillsAmount = bills
+    .filter((b: any) => b.status === "due-soon")
+    .reduce((sum: number, b: any) => sum + b.amount, 0);
+  const paidBillsAmount = bills
+    .filter((b: any) => b.status === "paid")
+    .reduce((sum: number, b: any) => sum + b.amount, 0);
+
+
+  const conicGradient = budgets.length > 0
+    ? budgetStats.map((b: any) => {
+      const percentage = (b.budgetAmount / totalBudgetLimit) * 100;
+      return { color: b.color, percentage };
+    }).reduce((acc: any, curr: any, i: number, arr: any[]) => {
+      const start = acc.prev;
+      const end = start + curr.percentage;
+      acc.str += `${curr.color} ${start}% ${end}%${i < arr.length - 1 ? ', ' : ''}`;
+      acc.prev = end;
+      return acc;
+    }, { str: "", prev: 0 }).str
+    : "#F2F2F2 0% 100%";
   return (
     <div className="flex flex-col lg:flex-row items-start w-full min-h-screen bg-beige-100 relative">
       {/* Desktop Sidebar (hidden on mobile, visible on lg) - added for structure consistency */}
@@ -39,21 +146,21 @@ export default function Home() {
         <div className="flex flex-col items-center px-4 pb-6 md:px-10 md:pb-8 lg:px-10 lg:pb-8 gap-8 w-full">
           {/* Summary (Balances) */}
           <div className="flex flex-col md:flex-row items-center gap-3 md:gap-6 w-full max-w-[480px] md:max-w-[688px] lg:max-w-[1060px]">
-            <div className="flex flex-col items-start p-5 md:p-6 gap-3 w-full bg-grey-900 rounded-xl flex-1 overflow-hidden">
+            <div className="flex flex-col items-start p-5 md:p-6 gap-3 w-full bg-grey-900 rounded-xl flex-1 min-w-0 overflow-hidden">
               <span className="text-preset-4 text-white">Current Balance</span>
-              <SmartAmount amount={formatCurrency(1836)} className="text-preset-1 text-white" />
+              <SmartAmount amount={formatCurrency(currentBalance)} className="text-preset-1 text-white" />
             </div>
 
             {/* Income */}
-            <div className="flex flex-col items-start p-5 md:p-6 gap-3 w-full bg-white rounded-xl flex-1 overflow-hidden">
+            <div className="flex flex-col items-start p-5 md:p-6 gap-3 w-full bg-white rounded-xl flex-1 min-w-0 overflow-hidden">
               <span className="text-preset-4 text-grey-500">Income</span>
-              <SmartAmount amount={formatCurrency(2350)} className="text-preset-1 text-grey-900" />
+              <SmartAmount amount={formatCurrency(statsIncome)} className="text-preset-1 text-grey-900" />
             </div>
 
             {/* Expenses */}
-            <div className="flex flex-col items-start p-5 md:p-6 gap-3 w-full bg-white rounded-xl flex-1 overflow-hidden">
+            <div className="flex flex-col items-start p-5 md:p-6 gap-3 w-full bg-white rounded-xl flex-1 min-w-0 overflow-hidden">
               <span className="text-preset-4 text-grey-500">Expenses</span>
-              <SmartAmount amount={formatCurrency(514)} className="text-preset-1 text-grey-900" />
+              <SmartAmount amount={formatCurrency(statsExpenses)} className="text-preset-1 text-grey-900" />
             </div>
           </div>
 
@@ -67,14 +174,14 @@ export default function Home() {
               <div className="flex flex-col items-start p-5 md:p-8 gap-5 w-full bg-white rounded-xl">
                 <div className="flex flex-row justify-between items-center w-full">
                   <h2 className="text-preset-2 text-grey-900">Saving Pot</h2>
-                  <button className="flex flex-row items-center gap-3 bg-transparent border-none text-preset-4 text-grey-500 hover:text-grey-900 group cursor-pointer">
+                  <Link href="/pots" className="flex flex-row items-center gap-3 bg-transparent border-none text-preset-4 text-grey-500 hover:text-grey-900 group cursor-pointer no-underline">
                     See Details
                     <span className="flex items-center justify-center w-3 h-3 text-grey-500 group-hover:text-grey-900">
                       <svg width="6" height="11" viewBox="0 0 6 11" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M1 1L5 5.5L1 10" stroke="currentColor" strokeWidth="2" />
                       </svg>
                     </span>
-                  </button>
+                  </Link>
                 </div>
 
                 <div className="flex flex-col md:flex-row items-center gap-5 w-full">
@@ -82,50 +189,24 @@ export default function Home() {
                     <div className="w-10 h-10 flex items-center justify-center shrink-0">
                       <Image src="/assets/images/icon-pot.svg" alt="Pot" width={40} height={40} />
                     </div>
-                    <div className="flex flex-col items-start gap-1 md:gap-[11px] overflow-hidden">
+                    <div className="flex flex-col items-start gap-1 md:gap-[11px] flex-1 w-full min-w-0">
                       <span className="text-preset-4 text-grey-500">Total Saved</span>
-                      <SmartAmount amount={formatCurrency(850)} className="text-preset-1 text-grey-900" />
+                      <SmartAmount amount={formatCurrency(totalSaved)} className="text-preset-1 text-grey-900" />
                     </div>
                   </div>
 
                   {/* Savings Array */}
                   <div className="flex flex-col items-start gap-4 w-full flex-1">
-                    <div className="flex flex-row items-center gap-4 md:gap-6 w-full">
-                      {/* Item 1 */}
-                      <div className="flex flex-row items-center gap-4 w-full flex-1 md:max-w-[170px]">
-                        <div className="w-1 h-11 bg-green rounded-lg"></div>
-                        <div className="flex flex-col justify-center gap-1">
-                          <span className="text-preset-5 text-grey-500">Savings</span>
-                          <span className="text-preset-4-bold text-grey-900">{formatCurrency(159)}</span>
+                    <div className="flex flex-wrap items-center gap-y-4 md:gap-x-6 w-full">
+                      {potsDisplay.map((pot: any, i: number) => (
+                        <div key={pot._id} className="flex flex-row items-center gap-4 w-[calc(50%-8px)] md:max-w-[170px]">
+                          <div className="w-1 h-11 rounded-lg shrink-0" style={{ backgroundColor: getThemeColor(pot.theme, i) }}></div>
+                          <div className="flex flex-col justify-center gap-1 flex-1 w-full min-w-0">
+                            <span className="text-preset-5 text-grey-500 line-clamp-1">{pot.name}</span>
+                            <SmartAmount amount={formatCurrency(pot.currentAmount)} className="text-preset-4-bold text-grey-900" />
+                          </div>
                         </div>
-                      </div>
-                      {/* Item 2 */}
-                      <div className="flex flex-row items-center gap-4 w-full flex-1 md:max-w-[170px]">
-                        <div className="w-1 h-11 bg-cyan rounded-lg"></div>
-                        <div className="flex flex-col justify-center gap-1">
-                          <span className="text-preset-5 text-grey-500">Christmas Gift</span>
-                          <span className="text-preset-4-bold text-grey-900">{formatCurrency(40)}</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="flex flex-row items-center gap-4 md:gap-6 w-full">
-                      {/* Item 3 */}
-                      <div className="flex flex-row items-center gap-4 w-full flex-1 md:max-w-[170px]">
-                        <div className="w-1 h-11 bg-navy rounded-lg"></div>
-                        <div className="flex flex-col justify-center gap-1">
-                          <span className="text-preset-5 text-grey-500">Concert Ticket</span>
-                          <span className="text-preset-4-bold text-grey-900">{formatCurrency(110)}</span>
-                        </div>
-                      </div>
-                      {/* Item 4 */}
-                      <div className="flex flex-row items-center gap-4 w-full flex-1 md:max-w-[170px]">
-                        <div className="w-1 h-11 bg-yellow rounded-lg"></div>
-                        <div className="flex flex-col justify-center gap-1">
-                          <span className="text-preset-5 text-grey-500">New Laptop</span>
-                          <span className="text-preset-4-bold text-grey-900">{formatCurrency(10)}</span>
-                        </div>
-                      </div>
+                      ))}
                     </div>
                   </div>
                 </div>
@@ -135,51 +216,18 @@ export default function Home() {
               <div className="flex flex-col items-start p-5 md:p-8 gap-8 w-full bg-white rounded-xl">
                 <div className="flex flex-row justify-between items-center w-full">
                   <h2 className="text-preset-2 text-grey-900">Transactions</h2>
-                  <button className="flex flex-row items-center gap-3 bg-transparent border-none text-preset-4 text-grey-500 hover:text-grey-900 group cursor-pointer">
+                  <Link href="/transactions" className="flex flex-row items-center gap-3 bg-transparent border-none text-preset-4 text-grey-500 hover:text-grey-900 group cursor-pointer no-underline">
                     View All
                     <span className="flex items-center justify-center w-3 h-3 text-grey-500 group-hover:text-grey-900">
                       <svg width="6" height="11" viewBox="0 0 6 11" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M1 1L5 5.5L1 10" stroke="currentColor" strokeWidth="2" />
                       </svg>
                     </span>
-                  </button>
+                  </Link>
                 </div>
 
-                {/* Transaction List */}
                 <div className="flex flex-col items-start w-full">
-                  {[
-                    { name: "Bravo Zen Spa", amount: 25.00, date: "29 Aug 2024", img: "/assets/images/avatars/emma-richardson.jpg", isPos: false },
-                    { name: "Alpha Analytics", amount: 450.00, date: "27 Aug 2024", img: "/assets/images/avatars/savory-bites-bistro.jpg", isPos: true },
-                    { name: "Echo Game Store", amount: 21.50, date: "22 Aug 2024", img: "/assets/images/avatars/daniel-carter.jpg", isPos: false },
-                    { name: "Food Merchant", amount: 21.50, date: "20 Aug 2024", img: "/assets/images/avatars/sun-park.jpg", isPos: false },
-                    { name: "Delta Taxi", amount: 15.00, date: "19 Aug 2024", img: "/assets/images/avatars/urban-services-hub.jpg", isPos: false },
-                  ].map((txn, index, array) => (
-                    <div key={index} className="flex flex-col w-full">
-                      <div className="flex flex-row justify-between items-center py-3 w-full">
-                        <div className="flex flex-row items-center gap-4">
-                          <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-beige-100 overflow-hidden relative">
-                            <Image
-                              src={txn.img}
-                              alt={txn.name}
-                              fill
-                              sizes="32px"
-                              className="object-cover"
-                            />
-                          </div>
-                          <span className="text-preset-4-bold text-grey-900">{txn.name}</span>
-                        </div>
-                        <div className="flex flex-col justify-center items-end gap-2 overflow-hidden">
-                          <SmartAmount 
-                             amount={formatCurrency(txn.amount)} 
-                             prefix={txn.isPos ? '+' : '-'}
-                             className={`text-preset-4-bold ${txn.isPos ? 'text-green' : 'text-grey-900'}`} 
-                          />
-                          <span className="text-preset-5 text-grey-500">{txn.date}</span>
-                        </div>
-                      </div>
-                      {index < array.length - 1 && <div className="w-full h-[1px] bg-grey-100 my-1"></div>}
-                    </div>
-                  ))}
+                  <TransactionTable userId={"j97bt09f8v13wdg5vntas879js16tshd" as any} limit={5} />
                 </div>
               </div>
 
@@ -192,110 +240,96 @@ export default function Home() {
               <div className="flex flex-col items-start p-5 md:p-8 gap-5 w-full bg-white rounded-xl">
                 <div className="flex flex-row justify-between items-center w-full">
                   <h2 className="text-preset-2 text-grey-900">My Budgets</h2>
-                  <button className="flex flex-row items-center gap-3 bg-transparent border-none text-preset-4 text-grey-500 hover:text-grey-900 group cursor-pointer">
+                  <Link href="/budgets" className="flex flex-row items-center gap-3 bg-transparent border-none text-preset-4 text-grey-500 hover:text-grey-900 group cursor-pointer no-underline">
                     See Details
                     <span className="flex items-center justify-center w-3 h-3 text-grey-500 group-hover:text-grey-900">
                       <svg width="6" height="11" viewBox="0 0 6 11" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M1 1L5 5.5L1 10" stroke="currentColor" strokeWidth="2" />
                       </svg>
                     </span>
-                  </button>
+                  </Link>
                 </div>
 
                 <div className="flex flex-col md:flex-row items-center justify-center gap-4 md:gap-8 w-full py-2">
                   {/* Pie Chart Representation */}
-                  <div className="relative flex justify-center items-center w-[240px] h-[240px]">
+                  <div className="relative flex justify-center items-center w-[240px] h-[240px] shrink-0">
                     <div
                       className="absolute w-[240px] h-[240px] rounded-full"
                       style={{
-                        background: "conic-gradient(#277C78 0% 6.1%, #82C9D7 6.1% 67.5%, #F2CDAC 67.5% 84%, #626070 84% 100%)"
+                        background: `conic-gradient(${conicGradient})`
                       }}
                     ></div>
                     <div className="absolute w-[187.5px] h-[187.5px] bg-white opacity-25 rounded-full mix-blend-screen z-10"></div>
                     <div className="absolute w-[162px] h-[162px] bg-white rounded-full z-20"></div>
                     <div className="absolute w-[162px] h-[162px] flex flex-col justify-center items-center gap-1 overflow-hidden px-2 z-30">
-                      <SmartAmount amount={formatCurrency(407)} className="text-preset-1 text-grey-900 text-center" />
-                      <SmartAmount 
-                        amount={formatCurrency(975)} 
-                        prefix="of " 
-                        suffix=" limit" 
-                        className="text-preset-5 text-grey-500 text-center" 
+                      <SmartAmount amount={formatCurrency(totalBudgetSpent)} className="text-preset-1 text-grey-900 text-center" />
+                      <SmartAmount
+                        amount={formatCurrency(totalBudgetLimit)}
+                        prefix="of "
+                        suffix=" limit"
+                        className="text-preset-4-bold text-grey-500 text-center"
                       />
                     </div>
                   </div>
 
                   {/* Legend */}
-                  <div className="flex flex-col gap-4 w-full md:w-auto">
-                    <div className="flex flex-row md:flex-col gap-4 w-full">
-                      {/* Item 1 */}
-                      <div className="flex flex-row items-center gap-4 flex-1">
-                        <div className="w-1 h-11 bg-green rounded-lg"></div>
-                        <div className="flex flex-col justify-center gap-1">
-                          <span className="text-preset-5 text-grey-500">Entertainment</span>
-                          <span className="text-preset-4-bold text-grey-900">{formatCurrency(25)}</span>
+                  <div className="flex flex-col gap-4 w-full md:w-auto min-w-0">
+                    <div className="grid grid-cols-2 md:grid-cols-1 gap-x-4 gap-y-4 w-full">
+                      {[...budgetStats].sort((a: any, b: any) => b.createdAt - a.createdAt).slice(0, 3).map((b: any, i: number) => (
+                        <div key={b._id} className="flex flex-row items-center gap-4 min-w-[120px]">
+                          <div className="w-1 h-[44px] rounded-lg shrink-0" style={{ backgroundColor: b.color }}></div>
+                          <div className="flex flex-col justify-center min-w-0">
+                            <span className="text-preset-5 text-grey-500 truncate">{b.category}</span>
+                            <SmartAmount 
+                              amount={formatCurrency(b.spent)} 
+                              className="text-preset-4-bold text-grey-900" 
+                              maxWidth={150}
+                            />
+                          </div>
                         </div>
-                      </div>
-                      {/* Item 2 */}
-                      <div className="flex flex-row items-center gap-4 flex-1">
-                        <div className="w-1 h-11 bg-cyan rounded-lg"></div>
-                        <div className="flex flex-col justify-center gap-1">
-                          <span className="text-preset-5 text-grey-500">Dining Out</span>
-                          <span className="text-preset-4-bold text-grey-900">{formatCurrency(67)}</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="flex flex-row md:flex-col gap-4 w-full">
-                      {/* Item 3 */}
-                      <div className="flex flex-row items-center gap-4 flex-1">
-                        <div className="w-1 h-11 bg-navy rounded-lg"></div>
-                        <div className="flex flex-col justify-center gap-1">
-                          <span className="text-preset-5 text-grey-500">Personal Care</span>
-                          <span className="text-preset-4-bold text-grey-900">{formatCurrency(65)}</span>
-                        </div>
-                      </div>
-                      {/* Item 4 */}
-                      <div className="flex flex-row items-center gap-4 flex-1">
-                        <div className="w-1 h-11 bg-yellow rounded-lg"></div>
-                        <div className="flex flex-col justify-center gap-1">
-                          <span className="text-preset-5 text-grey-500">Bills</span>
-                          <span className="text-preset-4-bold text-grey-900">{formatCurrency(250)}</span>
-                        </div>
-                      </div>
+                      ))}
                     </div>
                   </div>
                 </div>
               </div>
 
               {/* Recurring Bills */}
-              <div className="flex flex-col items-start p-5 md:p-8 gap-8 w-full bg-white rounded-xl">
+              <div className="flex flex-col items-start p-5 md:p-8 gap-8 w-full bg-white rounded-xl relative overflow-hidden group">
                 <div className="flex flex-row justify-between items-center w-full">
                   <h2 className="text-preset-2 text-grey-900">Recurring Bills</h2>
-                  <button className="flex flex-row items-center gap-3 bg-transparent border-none text-preset-4 text-grey-500 hover:text-grey-900 group cursor-pointer">
+                  <div className="flex flex-row items-center gap-3 bg-transparent border-none text-preset-4 text-grey-500 group cursor-default no-underline">
                     See Details
-                    <span className="flex items-center justify-center w-3 h-3 text-grey-500 group-hover:text-grey-900">
+                    <span className="flex items-center justify-center w-3 h-3 text-grey-500">
                       <svg width="6" height="11" viewBox="0 0 6 11" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M1 1L5 5.5L1 10" stroke="currentColor" strokeWidth="2" />
                       </svg>
                     </span>
-                  </button>
+                  </div>
                 </div>
 
-                <div className="flex flex-col items-start gap-3 w-full">
+                {/* Blurrable Content */}
+                <div className="flex flex-col items-start gap-3 w-full blur-[4px] select-none pointer-events-none opacity-50">
                   {/* Total */}
                   <div className="flex flex-row justify-between items-center py-5 px-4 w-full bg-beige-100 border-l-[4px] border-green rounded-lg">
                     <span className="text-preset-4 text-grey-500">Total recurring bills</span>
-                    <span className="text-preset-4-bold text-grey-900">{formatCurrency(1550)}</span>
+                    <span className="text-preset-4-bold text-grey-900">{formatCurrency(totalBillsAmount)}</span>
                   </div>
                   {/* Remaining */}
                   <div className="flex flex-row justify-between items-center py-5 px-4 w-full bg-beige-100 border-l-[4px] border-yellow rounded-lg">
                     <span className="text-preset-4 text-grey-500">Remaining this month</span>
-                    <span className="text-preset-4-bold text-grey-900">{formatCurrency(1230)}</span>
+                    <span className="text-preset-4-bold text-grey-900">{formatCurrency(remainingBillsAmount)}</span>
                   </div>
-                  {/* Due Soon */}
+                  {/* Paid */}
                   <div className="flex flex-row justify-between items-center py-5 px-4 w-full bg-beige-100 border-l-[4px] border-cyan rounded-lg">
-                    <span className="text-preset-4 text-grey-500">Total bills due soon</span>
-                    <span className="text-preset-4-bold text-grey-900">{formatCurrency(40)}</span>
+                    <span className="text-preset-4 text-grey-500">Paid Bills</span>
+                    <span className="text-preset-4-bold text-grey-900">{formatCurrency(paidBillsAmount)}</span>
+                  </div>
+                </div>
+
+                {/* Coming Soon Overlay */}
+                <div className="absolute inset-0 flex items-center justify-center z-40 bg-white/50 backdrop-blur-[2px]">
+                  <div className="px-6 py-3 bg-grey-900 rounded-xl shadow-2xl transform rotate-[-5deg] border-2 border-white/20">
+                    <span className="text-preset-3 text-white uppercase tracking-widest font-bold">Coming Soon</span>
                   </div>
                 </div>
               </div>

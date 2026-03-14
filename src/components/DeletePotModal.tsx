@@ -3,13 +3,22 @@
 import React, { useEffect } from "react";
 import Image from "next/image";
 
+import { useMutation } from "convex/react";
+import { api } from "../../convex/_generated/api";
+
 interface DeletePotModalProps {
   isOpen: boolean;
   onClose: () => void;
-  potName: string;
+  pot: {
+    _id: string;
+    name: string;
+  } | null;
 }
 
-export default function DeletePotModal({ isOpen, onClose, potName }: DeletePotModalProps) {
+export default function DeletePotModal({ isOpen, onClose, pot }: DeletePotModalProps) {
+  const [isLoading, setIsLoading] = React.useState(false);
+  const deletePot = useMutation(api.pots.deletePot);
+
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = "hidden";
@@ -21,6 +30,20 @@ export default function DeletePotModal({ isOpen, onClose, potName }: DeletePotMo
     };
   }, [isOpen]);
 
+  const handleDelete = async () => {
+    if (!pot) return;
+
+    setIsLoading(true);
+    try {
+      await deletePot({ id: pot._id as any });
+      onClose();
+    } catch (error) {
+      console.error("Failed to delete pot:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -29,7 +52,7 @@ export default function DeletePotModal({ isOpen, onClose, potName }: DeletePotMo
         {/* Header */}
         <div className="flex flex-row justify-between items-center w-full">
           <h2 className="text-preset-2 md:text-preset-1 text-grey-900">
-            Delete ‘{potName}’?
+            Delete ‘{pot?.name}’?
           </h2>
           <button
             onClick={onClose}
@@ -54,10 +77,13 @@ export default function DeletePotModal({ isOpen, onClose, potName }: DeletePotMo
         {/* Action Buttons */}
         <div className="flex flex-col gap-4 w-full">
           <button
-            onClick={onClose}
-            className="flex flex-row justify-center items-center p-4 w-full h-[53px] bg-red rounded-lg hover:opacity-80 transition-opacity shadow-sm"
+            onClick={handleDelete}
+            disabled={isLoading || !pot}
+            className="flex flex-row justify-center items-center p-4 w-full h-[53px] bg-red rounded-lg hover:opacity-80 transition-opacity shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <span className="text-preset-4-bold text-white">Yes, Confirm Deletion</span>
+            <span className="text-preset-4-bold text-white">
+              {isLoading ? "Deleting..." : "Yes, Confirm Deletion"}
+            </span>
           </button>
           
           <button

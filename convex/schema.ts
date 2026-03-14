@@ -2,6 +2,11 @@ import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
 
 export default defineSchema({
+  users: defineTable({
+    email: v.string(),
+    createdAt: v.number(),
+  }),
+
   transactions: defineTable({
     userId: v.string(),
     amount: v.number(),
@@ -9,12 +14,16 @@ export default defineSchema({
     type: v.string(),
     description: v.string(),
     date: v.string(),
+    createdAt: v.number(),
   }),
 
   budgets: defineTable({
     userId: v.string(),
     category: v.string(),
     budgetAmount: v.number(),
+    theme: v.string(),
+    createdAt: v.number(),
+    updatedAt: v.number(),
   }),
 
   pots: defineTable({
@@ -22,6 +31,9 @@ export default defineSchema({
     name: v.string(),
     targetAmount: v.number(),
     currentAmount: v.number(),
+    theme: v.string(),
+    createdAt: v.number(),
+    updatedAt: v.number(),
   }),
 
   recurringBills: defineTable({
@@ -30,5 +42,7 @@ export default defineSchema({
     amount: v.number(),
     dueDate: v.string(),
     status: v.string(),
+    createdAt: v.number(),
+    updatedAt: v.number(),
   }),
 });

@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Public_Sans } from 'next/font/google';
 import './globals.css';
 import { CurrencyProvider } from '@/providers/CurrencyProvider';
+import ConvexClientProvider from "./ConvexClientProvider";
 
 const publicSans = Public_Sans({
   subsets: ['latin'],
@@ -23,11 +24,15 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
+        suppressHydrationWarning
         className={`${publicSans.className} antialiased bg-beige-100 text-grey-900`}
       >
-        <CurrencyProvider>
-          {children}
-        </CurrencyProvider>
+        <ConvexClientProvider>
+          <CurrencyProvider>
+            {children}
+          </CurrencyProvider>
+        </ConvexClientProvider>
+
       </body>
     </html>
   );

@@ -7,6 +7,7 @@ import { useState } from "react";
 import ProfileModal from "@/components/ProfileModal";
 import { SmartAmount } from "@/components/SmartAmount";
 import { useCurrency } from "@/providers/CurrencyProvider";
+import { TransactionTable } from "@/components/TransactionTable";
 
 export default function TransactionsPage() {
   const { formatCurrency } = useCurrency();
@@ -16,6 +17,7 @@ export default function TransactionsPage() {
   const sortOptions = ["Latest", "Oldest", "A to Z", "Z to A", "Highest", "Lowest"];
   const [isCategoryOpen, setIsCategoryOpen] = useState(false);
   const [activeCategory, setActiveCategory] = useState("All Transactions");
+  const [searchQuery, setSearchQuery] = useState("");
   const categoryOptions = ["All Transactions", "Entertainment", "Bills", "Groceries", "Dining Out", "Transportation", "Personal Care", "Education", "Lifestyle", "Shopping", "General"];
   const txns = [
     { name: "Bravo Zen Spa", category: "Personal Care", amount: 25.00, date: "29 Aug 2024, 21:45", img: "/assets/images/avatars/emma-richardson.jpg", isPos: false },
@@ -55,6 +57,8 @@ export default function TransactionsPage() {
                 <input
                   type="text"
                   placeholder="Search transaction"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
                   className="w-full text-preset-4 text-grey-900 placeholder:text-grey-500 outline-none bg-transparent"
                 />
                 <Image src="/assets/images/icon-search.svg" alt="Search" width={16} height={16} className="opacity-60 group-focus-within:opacity-100" />
@@ -127,33 +131,13 @@ export default function TransactionsPage() {
               </div>
             </div>
 
-            <div className="flex flex-col items-start gap-4 w-full">
-              {txns.map((txn, index) => (
-                <div key={index} className="flex flex-col w-full gap-4">
-                  <div className="flex flex-row justify-between items-center w-full">
-                    <div className="flex flex-row items-center gap-3">
-                      <div className="w-8 h-8 rounded-full overflow-hidden relative shrink-0">
-                        <Image src={txn.img} alt={txn.name} fill sizes="32px" className="object-cover" />
-                      </div>
-                      <div className="flex flex-col justify-center items-start gap-1">
-                        <h2 className="text-preset-4-bold text-grey-900">{txn.name}</h2>
-                        <p className="text-preset-5 text-grey-500">{txn.category}</p>
-                      </div>
-                    </div>
-
-                    <div className="flex flex-col justify-center items-end gap-1 shrink-0 overflow-hidden">
-                      <SmartAmount 
-                        amount={formatCurrency(txn.amount)} 
-                        prefix={txn.isPos ? '+' : '-'}
-                        className={`text-preset-4-bold ${txn.isPos ? 'text-green' : 'text-grey-900'} text-right`} 
-                      />
-                      <span className="text-preset-5 text-grey-500">{txn.date}</span>
-                    </div>
-                  </div>
-                  {index < txns.length - 1 && <div className="w-full h-[1px] bg-grey-100"></div>}
-                </div>
-              ))}
-            </div>
+            {/* Passing a dummy userId for now - normally this comes from auth */}
+            <TransactionTable 
+              userId={"j97bt09f8v13wdg5vntas879js16tshd" as any} 
+              search={searchQuery}
+              category={activeCategory}
+              sort={activeSort}
+            />
 
             <div className="flex flex-row justify-between items-center pt-6 w-full">
               <button className="flex justify-center items-center w-[48px] h-10 border border-grey-500 rounded-lg bg-white cursor-pointer hover:bg-beige-100 transition-colors">

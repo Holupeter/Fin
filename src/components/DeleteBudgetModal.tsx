@@ -3,13 +3,22 @@
 import React, { useEffect } from "react";
 import Image from "next/image";
 
+import { useMutation } from "convex/react";
+import { api } from "../../convex/_generated/api";
+
 interface DeleteBudgetModalProps {
   isOpen: boolean;
   onClose: () => void;
-  categoryName: string;
+  budget: {
+    _id: string;
+    category: string;
+  } | null;
 }
 
-export default function DeleteBudgetModal({ isOpen, onClose, categoryName }: DeleteBudgetModalProps) {
+export default function DeleteBudgetModal({ isOpen, onClose, budget }: DeleteBudgetModalProps) {
+  const [isLoading, setIsLoading] = React.useState(false);
+  const deleteBudget = useMutation(api.budgets.deleteBudget);
+
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = "hidden";
@@ -21,6 +30,20 @@ export default function DeleteBudgetModal({ isOpen, onClose, categoryName }: Del
     };
   }, [isOpen]);
 
+  const handleDelete = async () => {
+    if (!budget) return;
+
+    setIsLoading(true);
+    try {
+      await deleteBudget({ id: budget._id as any });
+      onClose();
+    } catch (error) {
+      console.error("Failed to delete budget:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -29,7 +52,7 @@ export default function DeleteBudgetModal({ isOpen, onClose, categoryName }: Del
         {/* Header */}
         <div className="flex flex-row justify-between items-center w-full">
           <h2 className="text-preset-2 md:text-preset-1 text-grey-900">
-            Delete ‘{categoryName}’?
+            Delete ‘{budget?.category}’?
           </h2>
           <button
             onClick={onClose}
@@ -54,10 +77,13 @@ export default function DeleteBudgetModal({ isOpen, onClose, categoryName }: Del
         {/* Action Buttons */}
         <div className="flex flex-col gap-4 w-full">
           <button
-            onClick={onClose}
-            className="flex flex-row justify-center items-center p-4 w-full h-[53px] bg-red rounded-lg hover:opacity-80 transition-opacity shadow-sm"
+            onClick={handleDelete}
+            disabled={isLoading || !budget}
+            className="flex flex-row justify-center items-center p-4 w-full h-[53px] bg-red rounded-lg hover:opacity-80 transition-opacity shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <span className="text-preset-4-bold text-white">Yes, Confirm Deletion</span>
+            <span className="text-preset-4-bold text-white">
+              {isLoading ? "Deleting..." : "Yes, Confirm Deletion"}
+            </span>
           </button>
           
           <button

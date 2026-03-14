@@ -1,13 +1,14 @@
-"use client";
-
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import { useCurrency } from "@/providers/CurrencyProvider";
+import { useMutation } from "convex/react";
+import { api } from "../../convex/_generated/api";
 
 interface EditPotModalProps {
   isOpen: boolean;
   onClose: () => void;
   pot?: {
+    _id: string;
     name: string;
     target: number;
     theme: string;
@@ -15,19 +16,41 @@ interface EditPotModalProps {
 }
 
 export default function EditPotModal({ isOpen, onClose, pot }: EditPotModalProps) {
-  const { currency } = useCurrency();
+  const { currency, toDisplayValue, toInternalValue } = useCurrency();
   const [potName, setPotName] = useState("");
   const [target, setTarget] = useState("");
   const [themeColor, setThemeColor] = useState("Green");
   const [isThemeOpen, setIsThemeOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const updatePot = useMutation(api.pots.updatePot);
 
   useEffect(() => {
     if (pot) {
       setPotName(pot.name);
-      setTarget(pot.target.toString());
+      setTarget(toDisplayValue(pot.target).toString());
       setThemeColor(pot.theme);
     }
   }, [pot]);
+
+  const handleSubmit = async () => {
+    if (!pot || !potName || !target || isNaN(parseFloat(target))) return;
+
+    setIsLoading(true);
+    try {
+      await updatePot({
+        id: pot._id as any,
+        name: potName,
+        targetAmount: toInternalValue(parseFloat(target)),
+        theme: themeColor,
+      });
+      onClose();
+    } catch (error) {
+      console.error("Failed to update pot:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
     if (isOpen) {
@@ -144,7 +167,7 @@ export default function EditPotModal({ isOpen, onClose, pot }: EditPotModalProps
 
             {/* Theme Dropdown */}
             {isThemeOpen && (
-              <div className="absolute top-[75px] left-0 w-full bg-white shadow-[0px_4px_24px_rgba(0,0,0,0.25)] rounded-lg z-[60] py-3 px-5 flex flex-col gap-3 max-h-[200px] overflow-y-auto no-scrollbar">
+              <div className="absolute top-[75px] left-0 w-full bg-white shadow-[0px_4px_24px_rgba(0,0,0,0.25)] rounded-lg z-[60] py-3 px-5 flex flex-col gap-3 max-h-[160px] overflow-y-auto no-scrollbar">
                 {themes.map((theme, index) => (
                   <React.Fragment key={theme.name}>
                     <button
@@ -174,10 +197,13 @@ export default function EditPotModal({ isOpen, onClose, pot }: EditPotModalProps
 
         {/* Save Changes Button */}
         <button
-          className="flex flex-row justify-center items-center p-4 w-full h-[53px] bg-grey-900 rounded-lg mt-auto hover:bg-grey-500 transition-colors shadow-sm"
-          onClick={onClose}
+          className="flex flex-row justify-center items-center p-4 w-full h-[53px] bg-grey-900 rounded-lg mt-auto hover:bg-grey-500 transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+          onClick={handleSubmit}
+          disabled={isLoading || !potName || !target}
         >
-          <span className="text-preset-4-bold text-white">Save Changes</span>
+          <span className="text-preset-4-bold text-white">
+            {isLoading ? "Saving..." : "Save Changes"}
+          </span>
         </button>
       </div>
     </div>

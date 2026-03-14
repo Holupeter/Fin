@@ -4,19 +4,21 @@ import React, { useEffect, useRef, useState } from "react";
 
 interface SmartAmountProps {
   amount: string;
-  className?: string; // Base preset to use (e.g., text-preset-1)
+  className?: string; // Text preset to use (e.g., text-preset-1)
+  containerClassName?: string;
   prefix?: string;
   suffix?: string;
   maxWidth?: number; // Optional: specific width to fit into
 }
 
 /**
- * SmartAmount component that dynamically scales its content to fit within its container
- * using CSS transform scale. This is more "professional" than jumping between font sizes.
+ * SmartAmount component that dynamically scales its content to fit within its container.
+ * This version uses a more robust measurement approach to prevent overlapping and clipping.
  */
 export const SmartAmount: React.FC<SmartAmountProps> = ({ 
   amount, 
   className = "text-preset-1", 
+  containerClassName = "",
   prefix = "",
   suffix = "",
   maxWidth
@@ -30,41 +32,55 @@ export const SmartAmount: React.FC<SmartAmountProps> = ({
     const scaleToFit = () => {
       if (!containerRef.current || !textRef.current) return;
       
-      const containerWidth = maxWidth || containerRef.current.offsetWidth;
+      // Get the available width precisely
+      const containerWidth = maxWidth || containerRef.current.getBoundingClientRect().width;
       const textWidth = textRef.current.scrollWidth;
 
       if (textWidth > containerWidth && containerWidth > 0) {
-        // Use a slightly more aggressive buffer (0.85) and ensure max container width is respected
-        const safeContainerWidth = containerWidth - 4; // 4px buffer
-        const newScale = Math.max(0.4, safeContainerWidth / textWidth); 
+        // More aggressive buffer for professional spacing (10px)
+        const buffer = 10;
+        const availableWidth = Math.max(0, containerWidth - buffer);
+        const newScale = Math.max(0.35, availableWidth / textWidth); 
         setScale(newScale);
       } else {
         setScale(1);
       }
     };
 
+    // Use ResizeObserver for more reliable measurement than just window resize
+    const observer = new ResizeObserver(() => {
+      // Use requestAnimationFrame to ensure we measure after layout
+      requestAnimationFrame(scaleToFit);
+    });
+
+    if (containerRef.current) {
+      observer.observe(containerRef.current);
+    }
+
+    // Initial scale
     scaleToFit();
-    window.addEventListener('resize', scaleToFit);
-    return () => window.removeEventListener('resize', scaleToFit);
+
+    return () => observer.disconnect();
   }, [fullText, maxWidth]);
 
   const isCentered = /center|justify-center/.test(className);
 
   return (
     <div 
+      suppressHydrationWarning
       ref={containerRef} 
-      className={`flex items-center w-full overflow-hidden ${isCentered ? 'justify-center' : 'justify-start'}`}
-      style={{ minHeight: '1.2em' }}
+      className={`relative inline-flex items-center w-full overflow-visible ${isCentered ? 'justify-center' : 'justify-start'} ${containerClassName}`}
+      style={{ minHeight: '1.1em' }}
     >
       <span 
         ref={textRef}
-        className={`${className} whitespace-nowrap inline-block transition-transform duration-200 px-1`}
+        className={`${className} whitespace-nowrap transition-transform duration-200 ease-out`}
         style={{ 
           transform: `scale(${scale})`,
           transformOrigin: isCentered ? 'center' : 'left',
-          textAlign: isCentered ? 'center' : 'left',
-          width: 'auto',
-          display: 'inline-block'
+          display: 'inline-block',
+          width: scale < 1 ? `${100 / scale}%` : 'auto',
+          maxWidth: scale < 1 ? `${100 / scale}%` : 'none'
         }}
       >
         {fullText}

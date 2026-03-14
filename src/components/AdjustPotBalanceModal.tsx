@@ -4,11 +4,14 @@ import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import { SmartAmount } from "./SmartAmount";
 import { useCurrency } from "@/providers/CurrencyProvider";
+import { useMutation } from "convex/react";
+import { api } from "../../convex/_generated/api";
 
 interface AdjustPotBalanceModalProps {
   isOpen: boolean;
   onClose: () => void;
   pot: {
+    _id: string;
     name: string;
     saved: number;
     target: number;
@@ -19,8 +22,14 @@ interface AdjustPotBalanceModalProps {
 }
 
 export default function AdjustPotBalanceModal({ isOpen, onClose, pot, mode }: AdjustPotBalanceModalProps) {
-  const { formatCurrency, currency } = useCurrency();
+  const { formatCurrency, currency, toInternalValue } = useCurrency();
   const [amount, setAmount] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+
+  const addMoney = useMutation(api.pots.addMoneyToPot);
+  const withdrawMoney = useMutation(api.pots.withdrawMoneyFromPot);
+  const addTransaction = useMutation(api.transactions.addTransaction);
+  const dummyUserId = "j97bt09f8v13wdg5vntas879js16tshd";
   
   useEffect(() => {
     if (isOpen) {
@@ -34,10 +43,52 @@ export default function AdjustPotBalanceModal({ isOpen, onClose, pot, mode }: Ad
     };
   }, [isOpen]);
 
+  const handleSubmit = async () => {
+    if (!pot || !amount || isNaN(parseFloat(amount))) return;
+
+    setIsLoading(true);
+    try {
+      const internalAmount = toInternalValue(parseFloat(amount));
+      const now = new Date();
+      const dateStr = now.toLocaleDateString('en-GB', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric'
+      });
+
+      if (mode === "add") {
+        await addMoney({ id: pot._id as any, amount: internalAmount });
+        await addTransaction({
+          userId: dummyUserId,
+          amount: internalAmount,
+          category: "Savings",
+          type: "expense",
+          description: `Addition to ${pot.name}`,
+          date: dateStr
+        });
+      } else {
+        await withdrawMoney({ id: pot._id as any, amount: internalAmount });
+        await addTransaction({
+          userId: dummyUserId,
+          amount: internalAmount,
+          category: "Savings",
+          type: "income",
+          description: `Withdrawal from ${pot.name}`,
+          date: dateStr
+        });
+      }
+      onClose();
+    } catch (error) {
+      console.error("Failed to adjust pot balance:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   if (!isOpen || !pot) return null;
 
   const isAdd = mode === "add";
-  const numAmount = parseFloat(amount) || 0;
+  const numAmount = toInternalValue(parseFloat(amount) || 0);
   
   // Calculate new state for the bar
   const currentPercentage = (pot.saved / pot.target) * 100;
@@ -119,14 +170,16 @@ export default function AdjustPotBalanceModal({ isOpen, onClose, pot, mode }: Ad
             </div>
 
             {/* Target Texts */}
-            <div className="flex flex-row flex-wrap justify-between items-end w-full gap-2">
+            <div className="flex flex-row justify-between items-end w-full gap-2 overflow-hidden">
               <span className={`text-preset-5-bold ${isAdd ? 'text-green' : 'text-red'}`}>
                 {newPercentage.toFixed(2)}%
               </span>
-              <div className="flex flex-row gap-1 items-center">
-                <span className="text-preset-5 text-grey-500">Target of</span>
-                <SmartAmount amount={formatCurrency(pot.target)} className="text-preset-5 text-grey-500" />
-              </div>
+              <SmartAmount 
+                prefix="Target of "
+                amount={formatCurrency(pot.target)} 
+                className="text-preset-5 text-grey-500 text-right" 
+                maxWidth={220} 
+              />
             </div>
           </div>
         </div>
@@ -152,11 +205,12 @@ export default function AdjustPotBalanceModal({ isOpen, onClose, pot, mode }: Ad
 
         {/* Action Button */}
         <button
-          className="flex flex-row justify-center items-center p-4 w-full h-[53px] bg-grey-900 rounded-lg mt-auto hover:bg-grey-500 transition-colors shadow-sm"
-          onClick={onClose}
+          className="flex flex-row justify-center items-center p-4 w-full h-[53px] bg-grey-900 rounded-lg mt-auto hover:bg-grey-500 transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+          onClick={handleSubmit}
+          disabled={isLoading || !amount}
         >
           <span className="text-preset-4-bold text-white">
-            Confirm {isAdd ? "Addition" : "Withdrawal"}
+            {isLoading ? "Processing..." : `Confirm ${isAdd ? "Addition" : "Withdrawal"}`}
           </span>
         </button>
       </div>
