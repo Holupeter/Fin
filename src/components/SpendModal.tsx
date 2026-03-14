@@ -12,15 +12,18 @@ interface SpendModalProps {
   category: string;
 }
 
+import { useAuth } from "@/providers/AuthProvider";
+
 export default function SpendModal({ isOpen, onClose, category }: SpendModalProps) {
   const { currency, toInternalValue, formatCurrency } = useCurrency();
   const [amount, setAmount] = useState("");
   const [description, setDescription] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const { user } = useAuth();
 
   const addTransaction = useMutation(api.transactions.addTransaction);
-  const dummyUserId = "j97bt09f8v13wdg5vntas879js16tshd";
+  const userId = user?.id || "";
 
   useEffect(() => {
     if (isOpen) {
@@ -48,7 +51,7 @@ export default function SpendModal({ isOpen, onClose, category }: SpendModalProp
       });
 
       await addTransaction({
-        userId: dummyUserId,
+        userId,
         amount: toInternalValue(parseFloat(amount)),
         category: category,
         type: "expense",

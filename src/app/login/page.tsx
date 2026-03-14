@@ -5,13 +5,38 @@ import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
+import { supabase } from "@/lib/supabaseClient";
+
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
+  
   const router = useRouter();
 
-  const handleLogin = () => {
-    // Simple redirect for demonstration
-    router.push("/");
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setErrorMsg("");
+    setIsLoading(true);
+
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) {
+        setErrorMsg(error.message);
+      } else if (data.user) {
+        router.push("/");
+      }
+    } catch (err: any) {
+      setErrorMsg("An unexpected error occurred");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -67,7 +92,7 @@ export default function LoginPage() {
           <h1 className="text-preset-1 text-grey-900">Login</h1>
 
           {/* Content - Input Fields */}
-          <div className="flex flex-col items-start gap-4 w-full">
+          <form onSubmit={handleLogin} className="flex flex-col items-start gap-4 w-full">
             {/* Email Field */}
             <div className="flex flex-col items-start gap-1 w-full">
               <label className="text-preset-5-bold text-grey-500 w-full">
@@ -76,8 +101,11 @@ export default function LoginPage() {
               <div className="flex flex-row items-center px-5 py-3 gap-4 w-full h-[45px] bg-white border border-beige-500 rounded-lg">
                 <input
                   type="email"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   className="w-full text-preset-4 text-grey-900 bg-transparent border-none outline-none placeholder:text-beige-500"
-                  placeholder=""
+                  placeholder="email@example.com"
                 />
               </div>
             </div>
@@ -90,8 +118,11 @@ export default function LoginPage() {
               <div className="relative flex flex-row items-center px-5 py-3 gap-4 w-full h-[45px] bg-white border border-beige-500 rounded-lg">
                 <input
                   type={showPassword ? "text" : "password"}
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                   className="w-full text-preset-4 text-grey-900 bg-transparent border-none outline-none flex-1 placeholder:text-beige-500"
-                  placeholder=""
+                  placeholder="••••••••"
                 />
                 <button
                   type="button"
@@ -111,18 +142,24 @@ export default function LoginPage() {
                   />
                 </button>
               </div>
+              {errorMsg && (
+                <p className="text-preset-5 text-red w-full mt-1 text-left">{errorMsg}</p>
+              )}
             </div>
-          </div>
 
-          {/* Login Button */}
-          <div className="flex flex-row items-center gap-4 w-full h-[53px]">
-            <button 
-              onClick={handleLogin}
-              className="flex flex-row justify-center items-center p-4 gap-4 w-full h-[53px] bg-grey-900 rounded-lg cursor-pointer border-none hover:bg-grey-500 transition-colors"
-            >
-              <span className="text-preset-4-bold text-white">Login</span>
-            </button>
-          </div>
+            {/* Login Button */}
+            <div className="flex flex-row items-center gap-4 w-full h-[53px] mt-4">
+              <button 
+                disabled={isLoading}
+                type="submit"
+                className="flex flex-row justify-center items-center p-4 gap-4 w-full h-[53px] bg-grey-900 rounded-lg cursor-pointer border-none hover:bg-grey-500 transition-colors disabled:opacity-50"
+              >
+                <span className="text-preset-4-bold text-white">
+                  {isLoading ? "Logging in..." : "Login"}
+                </span>
+              </button>
+            </div>
+          </form>
 
           {/* Sign Up Link */}
           <div className="flex flex-col items-center gap-2 w-full">

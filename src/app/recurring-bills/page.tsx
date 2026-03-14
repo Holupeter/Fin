@@ -10,13 +10,26 @@ import { useCurrency } from "@/providers/CurrencyProvider";
 import { useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 
+import { useAuth } from "@/providers/AuthProvider";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
+
 export default function RecurringBillsPage() {
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const { formatCurrency } = useCurrency();
-  const dummyUserId = "j97bt09f8v13wdg5vntas879js16tshd";
-  const liveBills = useQuery(api.bills.getBills, { userId: dummyUserId });
+  const { user, isLoading: isAuthLoading } = useAuth();
+  const router = useRouter();
 
-  if (!liveBills) {
+  useEffect(() => {
+    if (!isAuthLoading && !user) {
+      router.push("/login");
+    }
+  }, [user, isAuthLoading, router]);
+
+  const userId = user?.id || "";
+  const liveBills = useQuery(api.bills.getBills, { userId });
+
+  if (isAuthLoading || !user || !liveBills) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-beige-100">
         <p className="text-preset-4 text-grey-500 animate-pulse">Loading Bills...</p>

@@ -15,6 +15,10 @@ import { useCurrency } from "@/providers/CurrencyProvider";
 import { useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 
+import { useAuth } from "@/providers/AuthProvider";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
+
 export default function BudgetsPage() {
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [isAddBudgetModalOpen, setIsAddBudgetModalOpen] = useState(false);
@@ -26,17 +30,25 @@ export default function BudgetsPage() {
   const [editingBudget, setEditingBudget] = useState<any>(null);
   const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
   const { formatCurrency } = useCurrency();
+  const { user, isLoading: isAuthLoading } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!isAuthLoading && !user) {
+      router.push("/login");
+    }
+  }, [user, isAuthLoading, router]);
 
   const toggleDropdown = (id: string) => {
     setOpenDropdownId(openDropdownId === id ? null : id);
   };
 
-  const dummyUserId = "j97bt09f8v13wdg5vntas879js16tshd";
+  const userId = user?.id || "";
 
-  const budgets = useQuery(api.budgets.getBudgets, { userId: dummyUserId });
-  const transactions = useQuery(api.transactions.getTransactions, { userId: dummyUserId });
+  const budgets = useQuery(api.budgets.getBudgets, { userId });
+  const transactions = useQuery(api.transactions.getTransactions, { userId });
 
-  if (!budgets || !transactions) {
+  if (isAuthLoading || !user || !budgets || !transactions) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-beige-100">
         <p className="text-preset-4 text-grey-500 animate-pulse">Loading Budgets...</p>

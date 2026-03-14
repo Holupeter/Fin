@@ -1,9 +1,10 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { useAuth } from "@/providers/AuthProvider";
+import { useRouter } from "next/navigation";
 import MobileSidebar from "@/components/MobileSidebar";
 import DesktopSidebar from "@/components/DesktopSidebar";
 import ProfileModal from "@/components/ProfileModal";
@@ -16,15 +17,23 @@ import { api } from "../../convex/_generated/api";
 export default function Home() {
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const { formatCurrency } = useCurrency();
+  const { user, isLoading: isAuthLoading } = useAuth();
+  const router = useRouter();
 
-  const dummyUserId = "j97bt09f8v13wdg5vntas879js16tshd";
+  useEffect(() => {
+    if (!isAuthLoading && !user) {
+      router.push("/login");
+    }
+  }, [user, isAuthLoading, router]);
 
-  const transactions = useQuery(api.transactions.getTransactions, { userId: dummyUserId });
-  const budgets = useQuery(api.budgets.getBudgets, { userId: dummyUserId });
-  const pots = useQuery(api.pots.getPots, { userId: dummyUserId });
-  const bills = useQuery(api.bills.getBills, { userId: dummyUserId });
+  const userId = user?.id || "";
 
-  if (!transactions || !budgets || !pots || !bills) {
+  const transactions = useQuery(api.transactions.getTransactions, { userId });
+  const budgets = useQuery(api.budgets.getBudgets, { userId });
+  const pots = useQuery(api.pots.getPots, { userId });
+  const bills = useQuery(api.bills.getBills, { userId });
+
+  if (isAuthLoading || !user || !transactions || !budgets || !pots || !bills) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-beige-100">
         <p className="text-preset-4 text-grey-500 animate-pulse">Loading Dashboard...</p>
@@ -227,7 +236,7 @@ export default function Home() {
                 </div>
 
                 <div className="flex flex-col items-start w-full">
-                  <TransactionTable userId={"j97bt09f8v13wdg5vntas879js16tshd" as any} limit={5} />
+                  <TransactionTable userId={userId as any} limit={5} />
                 </div>
               </div>
 

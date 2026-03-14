@@ -15,18 +15,21 @@ interface EditBudgetModalProps {
   };
 }
 
+import { useAuth } from "@/providers/AuthProvider";
+
 export default function EditBudgetModal({ isOpen, onClose, budget }: EditBudgetModalProps) {
   const { currency, toDisplayValue, toInternalValue, formatCurrency } = useCurrency();
   const [budgetCategory, setBudgetCategory] = useState(budget?.category || "Entertainment");
   const [maxSpending, setMaxSpending] = useState(budget?.budgetAmount?.toString() || "");
   const [themeColor, setThemeColor] = useState(budget?.theme || "Green");
   const [isLoading, setIsLoading] = useState(false);
+  const { user } = useAuth();
 
   const updateBudget = useMutation(api.budgets.updateBudget);
-  const dummyUserId = "j97bt09f8v13wdg5vntas879js16tshd";
+  const userId = user?.id || "";
 
-  const transactions = useQuery(api.transactions.getTransactions, { userId: dummyUserId });
-  const allBudgets = useQuery(api.budgets.getBudgets, { userId: dummyUserId });
+  const transactions = useQuery(api.transactions.getTransactions, { userId });
+  const allBudgets = useQuery(api.budgets.getBudgets, { userId });
 
   const [isCategoryOpen, setIsCategoryOpen] = useState(false);
   const [isThemeOpen, setIsThemeOpen] = useState(false);

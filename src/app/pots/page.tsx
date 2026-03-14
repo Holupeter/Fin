@@ -14,6 +14,10 @@ import { useCurrency } from "@/providers/CurrencyProvider";
 import { useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 
+import { useAuth } from "@/providers/AuthProvider";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
+
 export default function PotsPage() {
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [isAddPotModalOpen, setIsAddPotModalOpen] = useState(false);
@@ -26,15 +30,23 @@ export default function PotsPage() {
   const [editingPot, setEditingPot] = useState<any>(null);
   const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
   const { formatCurrency } = useCurrency();
+  const { user, isLoading: isAuthLoading } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!isAuthLoading && !user) {
+      router.push("/login");
+    }
+  }, [user, isAuthLoading, router]);
 
   const toggleDropdown = (id: string) => {
     setOpenDropdownId(openDropdownId === id ? null : id);
   };
 
-  const dummyUserId = "j97bt09f8v13wdg5vntas879js16tshd";
-  const livePots = useQuery(api.pots.getPots, { userId: dummyUserId });
+  const userId = user?.id || "";
+  const livePots = useQuery(api.pots.getPots, { userId });
 
-  if (!livePots) {
+  if (isAuthLoading || !user || !livePots) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-beige-100">
         <p className="text-preset-4 text-grey-500 animate-pulse">Loading Pots...</p>

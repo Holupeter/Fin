@@ -5,13 +5,50 @@ import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
+import { supabase } from "@/lib/supabaseClient";
+
 export default function SignUpPage() {
   const [showPassword, setShowPassword] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [fullName, setFullName] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
+  
   const router = useRouter();
 
-  const handleSignUp = () => {
-    // Simple redirect for demonstration
-    router.push("/");
+  const handleSignUp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setErrorMsg("");
+    
+    if (password.length < 8) {
+      setErrorMsg("Password must be at least 8 characters");
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            full_name: fullName,
+          }
+        }
+      });
+
+      if (error) {
+        setErrorMsg(error.message);
+      } else if (data.user) {
+        // Success - redirect to home
+        router.push("/");
+      }
+    } catch (err: any) {
+      setErrorMsg("An unexpected error occurred");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -67,7 +104,7 @@ export default function SignUpPage() {
           <h1 className="text-preset-1 text-grey-900">Sign Up</h1>
 
           {/* Content - Input Fields */}
-          <div className="flex flex-col items-start gap-4 w-full">
+          <form onSubmit={handleSignUp} className="flex flex-col items-start gap-4 w-full">
             {/* Name Field */}
             <div className="flex flex-col items-start gap-1 w-full">
               <label className="text-preset-5-bold text-grey-500 w-full">
@@ -76,8 +113,11 @@ export default function SignUpPage() {
               <div className="flex flex-row items-center px-5 py-3 gap-4 w-full h-[45px] bg-white border border-beige-500 rounded-lg">
                 <input
                   type="text"
+                  required
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
                   className="w-full text-preset-4 text-grey-900 bg-transparent border-none outline-none placeholder:text-beige-500"
-                  placeholder=""
+                  placeholder="e.g. John Doe"
                 />
               </div>
             </div>
@@ -90,8 +130,11 @@ export default function SignUpPage() {
               <div className="flex flex-row items-center px-5 py-3 gap-4 w-full h-[45px] bg-white border border-beige-500 rounded-lg">
                 <input
                   type="email"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   className="w-full text-preset-4 text-grey-900 bg-transparent border-none outline-none placeholder:text-beige-500"
-                  placeholder=""
+                  placeholder="email@example.com"
                 />
               </div>
             </div>
@@ -104,8 +147,11 @@ export default function SignUpPage() {
               <div className="relative flex flex-row items-center px-5 py-3 gap-4 w-full h-[45px] bg-white border border-beige-500 rounded-lg">
                 <input
                   type={showPassword ? "text" : "password"}
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                   className="w-full text-preset-4 text-grey-900 bg-transparent border-none outline-none flex-1 placeholder:text-beige-500"
-                  placeholder=""
+                  placeholder="••••••••"
                 />
                 <button
                   type="button"
@@ -125,21 +171,28 @@ export default function SignUpPage() {
                   />
                 </button>
               </div>
-              <p className="text-preset-5 text-grey-500 text-right w-full mt-1">
-                Passwords must be at least 8 characters
-              </p>
+              {errorMsg ? (
+                <p className="text-preset-5 text-red w-full mt-1 text-left">{errorMsg}</p>
+              ) : (
+                <p className="text-preset-5 text-grey-500 text-right w-full mt-1">
+                  Passwords must be at least 8 characters
+                </p>
+              )}
             </div>
-          </div>
 
-          {/* Sign Up Button */}
-          <div className="flex flex-row items-center gap-4 w-full h-[53px]">
-            <button 
-              onClick={handleSignUp}
-              className="flex flex-row justify-center items-center p-4 gap-4 w-full h-[53px] bg-grey-900 rounded-lg cursor-pointer border-none hover:bg-grey-500 transition-colors"
-            >
-              <span className="text-preset-4-bold text-white">Create Account</span>
-            </button>
-          </div>
+            {/* Sign Up Button */}
+            <div className="flex flex-row items-center gap-4 w-full h-[53px] mt-4">
+              <button 
+                disabled={isLoading}
+                type="submit"
+                className="flex flex-row justify-center items-center p-4 gap-4 w-full h-[53px] bg-grey-900 rounded-lg cursor-pointer border-none hover:bg-grey-500 transition-colors disabled:opacity-50"
+              >
+                <span className="text-preset-4-bold text-white">
+                  {isLoading ? "Creating Account..." : "Create Account"}
+                </span>
+              </button>
+            </div>
+          </form>
 
           {/* Login Link */}
           <div className="flex flex-col items-center gap-2 w-full">

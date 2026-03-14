@@ -13,15 +13,18 @@ interface ProfileModalProps {
   onClose: () => void;
 }
 
+import { useAuth } from "@/providers/AuthProvider";
+
 export default function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
   const { currency, setCurrency, formatCurrency } = useCurrency();
   const [mounted, setMounted] = useState(false);
   const [isAddCashOpen, setIsAddCashOpen] = useState(false);
   const router = useRouter();
+  const { user, signOut } = useAuth();
 
-  const dummyUserId = "j97bt09f8v13wdg5vntas879js16tshd";
-  const transactions = useQuery(api.transactions.getTransactions, { userId: dummyUserId });
-  const allBudgets = useQuery(api.budgets.getBudgets, { userId: dummyUserId });
+  const userId = user?.id || "";
+  const transactions = useQuery(api.transactions.getTransactions, { userId });
+  const allBudgets = useQuery(api.budgets.getBudgets, { userId });
 
   useEffect(() => {
     setMounted(true);
@@ -45,8 +48,9 @@ export default function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
 
   const currentBalance = totalIncome - totalExpenses - totalBudgeted;
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     onClose();
+    await signOut();
     router.push("/login");
   };
 
@@ -73,8 +77,8 @@ export default function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
               <Image src="/assets/images/avatars/emma-richardson.jpg" alt="Profile" fill className="object-cover" sizes="80px" />
             </div>
             <div className="flex flex-col items-center gap-1 text-center">
-              <h3 className="text-preset-2 text-grey-900">Emma Richardson</h3>
-              <p className="text-preset-4 text-grey-500">emma.richardson@example.com</p>
+              <h3 className="text-preset-2 text-grey-900">{user?.user_metadata?.full_name || "User"}</h3>
+              <p className="text-preset-4 text-grey-500">{user?.email}</p>
               <div className="flex flex-col gap-2 mt-2">
                 <div className="px-3 py-1 bg-green/10 rounded-full border border-green/20">
                   <span className="text-preset-5-bold text-green uppercase tracking-wide">Total Income: {formatCurrency(totalIncome)}</span>

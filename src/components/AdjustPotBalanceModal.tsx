@@ -21,15 +21,18 @@ interface AdjustPotBalanceModalProps {
   mode: "add" | "withdraw";
 }
 
+import { useAuth } from "@/providers/AuthProvider";
+
 export default function AdjustPotBalanceModal({ isOpen, onClose, pot, mode }: AdjustPotBalanceModalProps) {
   const { formatCurrency, currency, toInternalValue } = useCurrency();
   const [amount, setAmount] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const { user } = useAuth();
 
   const addMoney = useMutation(api.pots.addMoneyToPot);
   const withdrawMoney = useMutation(api.pots.withdrawMoneyFromPot);
   const addTransaction = useMutation(api.transactions.addTransaction);
-  const dummyUserId = "j97bt09f8v13wdg5vntas879js16tshd";
+  const userId = user?.id || "";
   
   useEffect(() => {
     if (isOpen) {
@@ -59,7 +62,7 @@ export default function AdjustPotBalanceModal({ isOpen, onClose, pot, mode }: Ad
       if (mode === "add") {
         await addMoney({ id: pot._id as any, amount: internalAmount });
         await addTransaction({
-          userId: dummyUserId,
+          userId,
           amount: internalAmount,
           category: "Savings",
           type: "expense",
@@ -69,7 +72,7 @@ export default function AdjustPotBalanceModal({ isOpen, onClose, pot, mode }: Ad
       } else {
         await withdrawMoney({ id: pot._id as any, amount: internalAmount });
         await addTransaction({
-          userId: dummyUserId,
+          userId,
           amount: internalAmount,
           category: "Savings",
           type: "income",

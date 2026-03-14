@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Public_Sans } from 'next/font/google';
 import './globals.css';
 import { CurrencyProvider } from '@/providers/CurrencyProvider';
+import { AuthProvider } from '@/providers/AuthProvider';
 import ConvexClientProvider from "./ConvexClientProvider";
 
 const publicSans = Public_Sans({
@@ -28,9 +29,11 @@ export default function RootLayout({
         className={`${publicSans.className} antialiased bg-beige-100 text-grey-900`}
       >
         <ConvexClientProvider>
-          <CurrencyProvider>
-            {children}
-          </CurrencyProvider>
+          <AuthProvider>
+            <CurrencyProvider>
+              {children}
+            </CurrencyProvider>
+          </AuthProvider>
         </ConvexClientProvider>
 
       </body>

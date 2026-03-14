@@ -9,18 +9,21 @@ interface AddBudgetModalProps {
   onClose: () => void;
 }
 
+import { useAuth } from "@/providers/AuthProvider";
+
 export default function AddBudgetModal({ isOpen, onClose }: AddBudgetModalProps) {
   const { currency, toInternalValue, formatCurrency } = useCurrency();
   const [budgetCategory, setBudgetCategory] = useState("Entertainment");
   const [maxSpending, setMaxSpending] = useState("");
   const [themeColor, setThemeColor] = useState("Green");
   const [isLoading, setIsLoading] = useState(false);
+  const { user } = useAuth();
 
   const addBudget = useMutation(api.budgets.addBudget);
-  const dummyUserId = "j97bt09f8v13wdg5vntas879js16tshd";
+  const userId = user?.id || "";
 
-  const transactions = useQuery(api.transactions.getTransactions, { userId: dummyUserId });
-  const allBudgets = useQuery(api.budgets.getBudgets, { userId: dummyUserId });
+  const transactions = useQuery(api.transactions.getTransactions, { userId });
+  const allBudgets = useQuery(api.budgets.getBudgets, { userId });
 
   const [isCategoryOpen, setIsCategoryOpen] = useState(false);
   const [isThemeOpen, setIsThemeOpen] = useState(false);
@@ -58,7 +61,7 @@ export default function AddBudgetModal({ isOpen, onClose }: AddBudgetModalProps)
     setErrorMessage("");
     try {
       await addBudget({
-        userId: dummyUserId,
+        userId,
         category: budgetCategory,
         budgetAmount: budgetVal,
         theme: themeColor,

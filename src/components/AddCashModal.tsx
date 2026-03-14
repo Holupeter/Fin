@@ -11,13 +11,16 @@ interface AddCashModalProps {
   onClose: () => void;
 }
 
+import { useAuth } from "@/providers/AuthProvider";
+
 export default function AddCashModal({ isOpen, onClose }: AddCashModalProps) {
   const { currency, toInternalValue } = useCurrency();
   const [amount, setAmount] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const { user } = useAuth();
 
   const addTransaction = useMutation(api.transactions.addTransaction);
-  const dummyUserId = "j97bt09f8v13wdg5vntas879js16tshd";
+  const userId = user?.id || "";
 
   const handleSubmit = async () => {
     if (!amount || isNaN(parseFloat(amount))) return;
@@ -33,7 +36,7 @@ export default function AddCashModal({ isOpen, onClose }: AddCashModalProps) {
       });
 
       await addTransaction({
-        userId: dummyUserId,
+        userId,
         amount: toInternalValue(parseFloat(amount)),
         category: "Cash Deposit",
         type: "income",

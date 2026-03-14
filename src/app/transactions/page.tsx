@@ -9,11 +9,34 @@ import { SmartAmount } from "@/components/SmartAmount";
 import { useCurrency } from "@/providers/CurrencyProvider";
 import { TransactionTable } from "@/components/TransactionTable";
 
+import { useAuth } from "@/providers/AuthProvider";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
+
 export default function TransactionsPage() {
   const { formatCurrency } = useCurrency();
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [isSortOpen, setIsSortOpen] = useState(false);
   const [activeSort, setActiveSort] = useState("Latest");
+  const { user, isLoading: isAuthLoading } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!isAuthLoading && !user) {
+      router.push("/login");
+    }
+  }, [user, isAuthLoading, router]);
+
+  const userId = user?.id || "";
+
+  if (isAuthLoading || !user) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-beige-100">
+        <p className="text-preset-4 text-grey-500 animate-pulse">Loading...</p>
+      </div>
+    );
+  }
+
   const sortOptions = ["Latest", "Oldest", "A to Z", "Z to A", "Highest", "Lowest"];
   const [isCategoryOpen, setIsCategoryOpen] = useState(false);
   const [activeCategory, setActiveCategory] = useState("All Transactions");
@@ -131,9 +154,9 @@ export default function TransactionsPage() {
               </div>
             </div>
 
-            {/* Passing a dummy userId for now - normally this comes from auth */}
+            {/* Passing real userId */}
             <TransactionTable 
-              userId={"j97bt09f8v13wdg5vntas879js16tshd" as any} 
+              userId={userId as any} 
               search={searchQuery}
               category={activeCategory}
               sort={activeSort}

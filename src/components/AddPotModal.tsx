@@ -9,6 +9,8 @@ interface AddPotModalProps {
   onClose: () => void;
 }
 
+import { useAuth } from "@/providers/AuthProvider";
+
 export default function AddPotModal({ isOpen, onClose }: AddPotModalProps) {
   const { currency, toInternalValue } = useCurrency();
   const [potName, setPotName] = useState("");
@@ -16,9 +18,10 @@ export default function AddPotModal({ isOpen, onClose }: AddPotModalProps) {
   const [themeColor, setThemeColor] = useState("Green");
   const [isThemeOpen, setIsThemeOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const { user } = useAuth();
 
   const addPot = useMutation(api.pots.addPot);
-  const dummyUserId = "j97bt09f8v13wdg5vntas879js16tshd";
+  const userId = user?.id || "";
 
   const handleSubmit = async () => {
     if (!potName || !target || isNaN(parseFloat(target))) return;
@@ -26,7 +29,7 @@ export default function AddPotModal({ isOpen, onClose }: AddPotModalProps) {
     setIsLoading(true);
     try {
       await addPot({
-        userId: dummyUserId,
+        userId,
         name: potName,
         targetAmount: toInternalValue(parseFloat(target)),
         currentAmount: 0,
