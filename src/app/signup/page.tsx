@@ -3,9 +3,16 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 export default function SignUpPage() {
   const [showPassword, setShowPassword] = useState(false);
+  const router = useRouter();
+
+  const handleSignUp = () => {
+    // Simple redirect for demonstration
+    router.push("/");
+  };
 
   return (
     <div className="flex flex-col lg:flex-row items-start w-full min-h-screen bg-beige-100">
@@ -126,7 +133,10 @@ export default function SignUpPage() {
 
           {/* Sign Up Button */}
           <div className="flex flex-row items-center gap-4 w-full h-[53px]">
-            <button className="flex flex-row justify-center items-center p-4 gap-4 w-full h-[53px] bg-grey-900 rounded-lg cursor-pointer border-none">
+            <button 
+              onClick={handleSignUp}
+              className="flex flex-row justify-center items-center p-4 gap-4 w-full h-[53px] bg-grey-900 rounded-lg cursor-pointer border-none hover:bg-grey-500 transition-colors"
+            >
               <span className="text-preset-4-bold text-white">Create Account</span>
             </button>
           </div>

@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useCurrency } from "@/providers/CurrencyProvider";
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 
 interface ProfileModalProps {
   isOpen: boolean;
@@ -12,10 +13,16 @@ interface ProfileModalProps {
 export default function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
   const { currency, setCurrency } = useCurrency();
   const [mounted, setMounted] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  const handleLogout = () => {
+    onClose();
+    router.push("/login");
+  };
 
   if (!isOpen || !mounted) return null;
 
@@ -61,6 +68,13 @@ export default function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
             </button>
           </div>
         </div>
+
+        <button
+          onClick={handleLogout}
+          className="flex flex-row justify-center items-center py-4 px-4 w-full bg-grey-100 rounded-lg border-none cursor-pointer mt-2 group hover:bg-grey-900 transition-colors"
+        >
+          <span className="text-preset-4-bold text-red group-hover:text-white transition-colors">Log Out</span>
+        </button>
       </div>
     </div>
   );
