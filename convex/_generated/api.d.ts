@@ -12,6 +12,7 @@ import type * as bills from "../bills.js";
 import type * as budgets from "../budgets.js";
 import type * as pots from "../pots.js";
 import type * as transactions from "../transactions.js";
+import type * as users from "../users.js";
 
 import type {
   ApiFromModules,
@@ -24,6 +25,7 @@ declare const fullApi: ApiFromModules<{
   budgets: typeof budgets;
   pots: typeof pots;
   transactions: typeof transactions;
+  users: typeof users;
 }>;
 
 /**

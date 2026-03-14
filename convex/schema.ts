@@ -3,9 +3,12 @@ import { v } from "convex/values";
 
 export default defineSchema({
   users: defineTable({
+    userId: v.string(),
     email: v.string(),
+    fullName: v.optional(v.string()),
+    avatarStorageId: v.optional(v.string()),
     createdAt: v.number(),
-  }),
+  }).index("by_userId", ["userId"]),
 
   transactions: defineTable({
     userId: v.string(),

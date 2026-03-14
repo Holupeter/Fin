@@ -6,6 +6,7 @@ import DesktopSidebar from "@/components/DesktopSidebar";
 import Image from "next/image";
 import { useState } from "react";
 import ProfileModal from "@/components/ProfileModal";
+import UserAvatar from "@/components/UserAvatar";
 import AddBudgetModal from "@/components/AddBudgetModal";
 import EditBudgetModal from "@/components/EditBudgetModal";
 import DeleteBudgetModal from "@/components/DeleteBudgetModal";
@@ -127,7 +128,7 @@ export default function BudgetsPage() {
     <div className="flex flex-col lg:flex-row items-start w-full min-h-screen bg-beige-100 relative">
       <DesktopSidebar />
 
-      <main className="flex flex-col items-center w-full flex-1 mb-[52px] lg:mb-0 max-w-[1140px] mx-auto">
+      <main className="flex flex-col items-center flex-1 min-w-0 mb-[52px] lg:mb-0 max-w-[1140px] mx-auto">
         <div className="sticky top-0 z-10 flex flex-row items-center justify-center w-full bg-beige-100 px-4 pt-6 pb-6 md:px-10 md:pt-8 md:pb-8 lg:px-10 lg:pt-8 lg:pb-8">
           <div className="flex flex-row items-center justify-between w-full max-w-[480px] md:max-w-[688px] lg:max-w-[1060px]">
             <h1 className="text-preset-1 text-grey-900">Budgets</h1>
@@ -140,10 +141,10 @@ export default function BudgetsPage() {
               </button>
               <button
                 onClick={() => setIsProfileModalOpen(true)}
-                className="w-10 h-10 rounded-full bg-white overflow-hidden border border-grey-500 relative cursor-pointer opacity-90 hover:opacity-100 transition-opacity p-0 flex-shrink-0"
+                className="p-0 border-none bg-transparent cursor-pointer opacity-90 hover:opacity-100 transition-opacity flex-shrink-0"
                 aria-label="Open Profile"
               >
-                <Image src="/assets/images/avatars/emma-richardson.jpg" alt="Profile" fill sizes="40px" className="object-cover" />
+                <UserAvatar />
               </button>
             </div>
           </div>
@@ -152,7 +153,7 @@ export default function BudgetsPage() {
         <div className="flex flex-col items-center w-full px-4 pb-6 md:px-10 md:pb-8 lg:px-10 lg:pb-8">
           <div className="flex flex-col lg:flex-row items-center lg:items-start gap-6 w-full max-w-[480px] md:max-w-[688px] lg:max-w-[1060px]">
             {/* Left Side (Chart container) */}
-            <div className="flex flex-col md:flex-row lg:flex-col justify-center items-center md:items-start py-6 px-5 gap-8 md:p-8 w-full max-w-[480px] md:max-w-[688px] lg:max-w-[428px] lg:w-[428px] bg-white rounded-xl">
+            <div className="flex flex-col md:flex-row lg:flex-col justify-center items-center md:items-start py-6 px-5 gap-8 md:p-8 w-full max-w-[480px] md:max-w-[688px] lg:max-w-[428px] lg:flex-1 bg-white rounded-xl">
               {/* Chart */}
               <div className="flex flex-row justify-center items-center gap-2 w-full max-w-[303px] md:max-w-[296px] lg:max-w-[364px] md:h-[280px]">
                 <div className="relative flex justify-center items-center w-[240px] h-[240px]">
@@ -205,7 +206,7 @@ export default function BudgetsPage() {
             </div>
 
             {/* Right Side (Budget List) */}
-            <div className="flex flex-col items-start gap-6 w-full max-w-[480px] md:max-w-[688px] lg:max-w-[608px] lg:w-[608px]">
+            <div className="flex flex-col items-start gap-6 w-full max-w-[480px] md:max-w-[688px] lg:max-w-[608px] lg:flex-[1.5] lg:min-w-0">
               {budgetStats.map((budget, i) => {
                 const progressWidth = Math.min(100, (budget.spent / budget.budgetAmount) * 100);
                 const themeColor = budget.color;

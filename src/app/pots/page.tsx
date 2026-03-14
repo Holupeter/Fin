@@ -5,6 +5,7 @@ import MobileSidebar from "@/components/MobileSidebar";
 import Image from "next/image";
 import { useState } from "react";
 import ProfileModal from "@/components/ProfileModal";
+import UserAvatar from "@/components/UserAvatar";
 import AddPotModal from "@/components/AddPotModal";
 import EditPotModal from "@/components/EditPotModal";
 import DeletePotModal from "@/components/DeletePotModal";
@@ -99,7 +100,7 @@ export default function PotsPage() {
     <div className="flex flex-col lg:flex-row items-start w-full min-h-screen bg-beige-100 relative">
       <DesktopSidebar />
 
-      <main className="flex flex-col items-center w-full flex-1 mb-[52px] lg:mb-0 max-w-[1140px] mx-auto">
+      <main className="flex flex-col items-center flex-1 min-w-0 mb-[52px] lg:mb-0 max-w-[1140px] mx-auto">
         <div className="sticky top-0 z-10 flex flex-row items-center justify-center w-full bg-beige-100 px-4 pt-6 pb-6 md:px-10 md:pt-8 md:pb-8 lg:px-10 lg:pt-8 lg:pb-8">
           <div className="flex flex-row items-center justify-between w-full max-w-[480px] md:max-w-[688px] lg:max-w-[1060px]">
             <h1 className="text-preset-1 text-grey-900">Pots</h1>
@@ -112,10 +113,10 @@ export default function PotsPage() {
               </button>
               <button 
                 onClick={() => setIsProfileModalOpen(true)}
-                className="w-10 h-10 rounded-full bg-white overflow-hidden border border-grey-500 relative cursor-pointer opacity-90 hover:opacity-100 transition-opacity p-0 flex-shrink-0"
+                className="p-0 border-none bg-transparent cursor-pointer opacity-90 hover:opacity-100 transition-opacity flex-shrink-0"
                 aria-label="Open Profile"
               >
-                <Image src="/assets/images/avatars/emma-richardson.jpg" alt="Profile" fill sizes="40px" className="object-cover" />
+                <UserAvatar />
               </button>
             </div>
           </div>

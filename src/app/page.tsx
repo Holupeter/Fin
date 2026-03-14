@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 import MobileSidebar from "@/components/MobileSidebar";
 import DesktopSidebar from "@/components/DesktopSidebar";
 import ProfileModal from "@/components/ProfileModal";
+import UserAvatar from "@/components/UserAvatar";
 import { SmartAmount } from "@/components/SmartAmount";
 import { useCurrency } from "@/providers/CurrencyProvider";
 import { TransactionTable } from "@/components/TransactionTable";
@@ -134,7 +135,8 @@ export default function Home() {
       <DesktopSidebar />
 
       {/* Main Content Area */}
-      <main className="flex flex-col items-center w-full flex-1 mb-20 lg:mb-0 max-w-[1140px] mx-auto">
+      {/* Main Content Area */}
+      <main className="flex flex-col items-center flex-1 min-w-0 mb-20 lg:mb-0 max-w-[1140px] mx-auto">
 
         {/* Main Content Title */}
         <div className="sticky top-0 z-10 flex flex-row items-start justify-center w-full bg-beige-100 px-4 pt-6 pb-6 md:px-10 md:pt-8 md:pb-8 lg:px-10 lg:pt-8 lg:pb-8">
@@ -144,10 +146,10 @@ export default function Home() {
             {/* Profile Avatar Trigger */}
             <button
               onClick={() => setIsProfileModalOpen(true)}
-              className="w-10 h-10 rounded-full bg-white overflow-hidden border border-grey-500 relative cursor-pointer opacity-90 hover:opacity-100 transition-opacity p-0"
+              className="p-0 border-none bg-transparent cursor-pointer opacity-90 hover:opacity-100 transition-opacity"
               aria-label="Open Profile"
             >
-              <Image src="/assets/images/avatars/emma-richardson.jpg" alt="Profile" fill sizes="40px" className="object-cover" />
+              <UserAvatar />
             </button>
           </div>
         </div>

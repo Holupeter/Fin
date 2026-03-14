@@ -7,6 +7,8 @@ import { useRouter } from "next/navigation";
 import { useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import AddCashModal from "./AddCashModal";
+import { useRef } from "react";
+import { useMutation } from "convex/react";
 
 interface ProfileModalProps {
   isOpen: boolean;
@@ -19,12 +21,19 @@ export default function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
   const { currency, setCurrency, formatCurrency } = useCurrency();
   const [mounted, setMounted] = useState(false);
   const [isAddCashOpen, setIsAddCashOpen] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
   const { user, signOut } = useAuth();
 
   const userId = user?.id || "";
   const transactions = useQuery(api.transactions.getTransactions, { userId });
   const allBudgets = useQuery(api.budgets.getBudgets, { userId });
+  const convexUser = useQuery(api.users.getUser, { userId });
+  const avatarUrl = useQuery(api.users.getAvatarUrl, { storageId: convexUser?.avatarStorageId });
+
+  const generateUploadUrl = useMutation(api.users.generateUploadUrl);
+  const updateAvatar = useMutation(api.users.updateAvatar);
 
   useEffect(() => {
     setMounted(true);
@@ -47,6 +56,46 @@ export default function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
     : 0;
 
   const currentBalance = totalIncome - totalExpenses - totalBudgeted;
+
+  const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file || !user) return;
+
+    // Check file size (limit to 2MB)
+    if (file.size > 2 * 1024 * 1024) {
+      alert("Image size should be less than 2MB");
+      return;
+    }
+
+    setIsUploading(true);
+    try {
+      // 1. Get Convex Upload URL
+      const postUrl = await generateUploadUrl();
+
+      // 2. POST the file to Convex Storage
+      const result = await fetch(postUrl, {
+        method: "POST",
+        headers: { "Content-Type": file.type },
+        body: file,
+      });
+
+      if (!result.ok) throw new Error("Upload failed");
+
+      const { storageId } = await result.json();
+
+      // 3. Update User's avatar storage ID in Convex
+      await updateAvatar({
+        userId,
+        storageId,
+      });
+
+    } catch (error: any) {
+      console.error("Error uploading avatar:", error.message);
+      alert("Failed to upload image to Convex storage.");
+    } finally {
+      setIsUploading(false);
+    }
+  };
 
   const handleLogout = async () => {
     onClose();
@@ -73,11 +122,37 @@ export default function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
           </div>
 
           <div className="flex flex-col items-center gap-4">
-            <div className="w-20 h-20 rounded-full border border-grey-500 overflow-hidden relative">
-              <Image src="/assets/images/avatars/emma-richardson.jpg" alt="Profile" fill className="object-cover" sizes="80px" />
+            <div className="relative group cursor-pointer" onClick={() => fileInputRef.current?.click()}>
+              <div className="w-24 h-24 rounded-full border-4 border-beige-100 overflow-hidden relative shadow-md group-hover:opacity-80 transition-all">
+                {avatarUrl ? (
+                  <Image src={avatarUrl} alt="Profile" fill className="object-cover" sizes="96px" />
+                ) : (
+                  <Image src="/assets/images/avatars/emma-richardson.jpg" alt="Profile" fill className="object-cover" sizes="96px" />
+                )}
+                
+                {isUploading && (
+                  <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                    <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  </div>
+                )}
+                
+                <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-white">
+                      <path d="M23 19C23 19.5304 22.7893 20.0391 22.4142 20.4142C22.0391 20.7893 21.5304 21 21 21H3C2.46957 21 1.96086 20.7893 1.58579 20.4142C1.21071 20.0391 1 19.5304 1 19V8C1 7.46957 1.21071 6.96086 1.58579 6.58579C1.96086 6.21071 2.46957 6 3 6H7L9 3H15L17 6H21C21.5304 6 22.0391 6.21071 22.4142 6.58579C22.7893 6.96086 23 7.46957 23 8V19Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      <path d="M12 17C14.2091 17 16 15.2091 16 13C16 10.7909 14.2091 9 12 9C9.79086 9 8 10.7909 8 13C8 15.2091 9.79086 17 12 17Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                   </svg>
+                </div>
+              </div>
+              <input 
+                type="file" 
+                ref={fileInputRef} 
+                onChange={handleAvatarUpload} 
+                className="hidden" 
+                accept="image/*"
+              />
             </div>
             <div className="flex flex-col items-center gap-1 text-center">
-              <h3 className="text-preset-2 text-grey-900">{user?.user_metadata?.full_name || "User"}</h3>
+              <h3 className="text-preset-2 text-grey-900">{convexUser?.fullName || user?.user_metadata?.full_name || "User"}</h3>
               <p className="text-preset-4 text-grey-500">{user?.email}</p>
               <div className="flex flex-col gap-2 mt-2">
                 <div className="px-3 py-1 bg-green/10 rounded-full border border-green/20">
