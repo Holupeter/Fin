@@ -2,7 +2,8 @@
 
 **Fin.** is a premium, full-stack personal finance application designed for clarity, discipline, and goal-oriented wealth management. Built with a modern tech stack, it provides users with a comprehensive overview of their financial health, from budget tracking to savings goals.
 
-![Fin. Dashboard](/public/assets/images/logo.svg) <!-- Replace with a real screenshot if available later -->
+## Live Demo
+[View on Netilfy](https://fin-manage.netlify.app/)
 
 ## 🚀 Key Features
 
